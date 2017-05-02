@@ -1,0 +1,13 @@
+Package: tableone
+Title: Generates A Table In The Style of Table One From A Medical Paper
+Version: 0.0.0.9000
+Authors@R: person("Nick", "Kennedy", email = "r@nick-kennedy.com", role = c("aut", "cre"))
+Description: tableone generates a table in the style of Table 1 from a medical
+  paper, typically containing demographics and possibly stratified by some
+  grouping variable
+Depends: R (>= 3.4.0)
+Imports: rlang
+License: GPL version 3.0
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 6.0.1

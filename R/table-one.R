@@ -21,6 +21,7 @@ table_one <- function(data,
                       small_p = c("<", "E", "x10"),
                       include_n = FALSE) {
   row_details <- quos(...)
+  small_p <- match.arg(small_p)
 
   row_structure <- lapply(
     row_details,

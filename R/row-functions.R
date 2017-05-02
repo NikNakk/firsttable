@@ -98,7 +98,7 @@ fisher_row <- function(data_item,
   )
 }
 
-pretty_p <- function(p, p_digits, small_p = c("<", "E", "x10")) {
+pretty_p <- function(p, p_digits, small_p = c("<", "E", "x10", "plotmath")) {
   small_p <- match.arg(small_p)
   small_p_func <- switch(
     small_p,
@@ -110,6 +110,9 @@ pretty_p <- function(p, p_digits, small_p = c("<", "E", "x10")) {
     },
     `x10` = function(p, p_digits) {
       sub("E(-?)\\+?0?(\\d+)", "x10^\\1\\2", sprintf("%.1E", p))
+    },
+    plotmath = function(p, p_digits) {
+      sub("E(-?)\\+?0?(\\d+)", "%*% 10^\\1\\2", sprintf("%.1E", p))
     }
   )
   ifelse(

@@ -70,7 +70,7 @@ table_one <- function(data,
   output <- list_len(n_row)
 
   for (i in seq_along(row_structure)) {
-    output_data <- row_structure[[i]]$data_function(data, column_split, digits)
+    output_data <- row_structure[[i]]$data_function(data, column_split, digits, include_n)
     output[[i]] <- cbind(
       matrix(
         c(
@@ -96,6 +96,9 @@ table_one <- function(data,
   output <- invoke(rbind, output)
 
   col_names <- c("Variable", "Level")
+  if (include_n) {
+    col_names <- c(col_names, "n")
+  }
   if (!is.null(UQE(column_variable))) {
     col_names <- c(col_names, levels(column_split))
   } else {

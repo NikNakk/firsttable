@@ -32,10 +32,11 @@ wilcox_row <- function(data_item,
 # med_iqr -----------------------------------------------------------------
 
 med_iqr <- function(data_item, row_digits, na.rm) {
-  function(data, column_split, digits) {
+  function(data, column_split, digits, include_n) {
   digits <- row_digits %||% digits
+  item <- eval_tidy(data_item, data)
   quartiles <- tapply(
-    eval_tidy(data_item, data),
+    item,
     column_split,
     quantile,
     probs = seq(0.25, 0.75, 0.25),
@@ -50,6 +51,9 @@ med_iqr <- function(data_item, row_digits, na.rm) {
     quartiles[1, ],
     quartiles[3, ]
   )
+  if (include_n) {
+    output <- c(sum(!is.na(item)), output)
+  }
   output <- matrix(c("", output), nrow = 1L)
   }
 }
@@ -71,7 +75,7 @@ fisher_row <- function(data_item,
                        reference_level = NULL) {
   data_item <- enquo(data_item)
   list(
-    data_function = function(data, column_split, digits) {
+    data_function = function(data, column_split, digits, include_n) {
       digits <- row_digits %||% digits
       item <- eval_tidy(data_item, data)
       tab <- table(item, column_split)
@@ -86,6 +90,13 @@ fisher_row <- function(data_item,
       output <- cbind(rownames(tab), output)
       if (!is.null(reference_level)) {
         output <- output[rownames(tab) != reference_level, , drop = FALSE]
+      }
+      if (include_n) {
+        output <- cbind(
+          output[, 1L, drop = FALSE],
+          matrix(c(sum(!is.na(item)), rep("", nrow(output) - 1L)), ncol = 1L),
+          output[, -1L, drop = FALSE]
+          )
       }
       output
     },

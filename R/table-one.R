@@ -18,89 +18,97 @@ table_one <- function(data,
                       digits = 1,
                       include_p = TRUE,
                       p_digits = 3,
-                      small_p = c("<", "E", "x10"),
+                      small_p_format = c("<", "E", "x10"),
+                      small_p_cutoff = 10 ^ -p_digits,
                       include_n = FALSE) {
   row_details <- quos(...)
-  small_p <- match.arg(small_p)
-
-  row_structure <- lapply(
-    row_details,
-    function(row_item) {
-      data_item <- eval_tidy(row_item, data)
-      if (is.call(row_item[[2L]])) {
-        # Already calls a function
-        if (is.list(data_item) && names(data_item) == c("data_function", "p_function")) {
-          return(data_item)
-        }
-      }
-      if (is.numeric(data_item)) {
-        wilcox_row(!!row_item)
-      } else if (is.logical(data_item)) {
-        fisher_row(!!row_item, reference_level = "FALSE")
-      } else {
-        fisher_row(!!row_item)
-      }
-    })
-
-  if (is.null(names(row_details))) {
-    names(row_structure) <- rep("", length(row_structure))
-  } else {
-    names(row_structure) <- names(row_details)
-  }
-
-  for (i in which(names(row_structure) == "")) {
-    expr <- UQE(row_details[[i]])
-    if (is_symbol(expr)) {
-      names(row_structure)[[i]] <- deparse(expr)
-    } else if (is.call(expr)) {
-      names(row_structure)[[i]] <- deparse(expr[[2L]])
-    }
-  }
+  small_p_format <- match.arg(small_p_format)
 
   column_variable <- enquo(column_variable)
   if (!is.null(UQE(column_variable))) {
-    column_split <- as.factor(eval_tidy(column_variable, data))
+    col_item <- as.factor(eval_tidy(column_variable, data))
   } else {
-    column_split <- factor(rep(1, nrow(data)))
+    col_item <- factor(rep(1, nrow(data)))
     include_p <- FALSE
   }
-  n_row <- length(row_structure)
-  n_col <- length(levels(column_split))
+  n_row <- length(row_details)
+  n_col <- length(levels(col_item))
 
   output <- list_len(n_row)
 
-  for (i in seq_along(row_structure)) {
-    output_data <- row_structure[[i]]$data_function(data, column_split, digits, include_n)
-    output[[i]] <- cbind(
-      matrix(
-        c(
-          names(row_structure)[i],
-          rep("", nrow(output_data) - 1L)
-        ),
-        nrow = nrow(output_data)),
-      output_data
-      )
+  if (is.null(names(row_details))) {
+    row_names <- rep(NA_character_, length(row_structure))
+  } else {
+    row_names <- names(row_details)
+    row_names[row_names == ""] <- NA_character_
+  }
+
+  for (i in seq_along(row_details)) {
+    details_item <- row_details[[i]]
+    data_item <- eval_tidy(details_item, data)
+    if (is.call(details_item[[2L]]) &&
+        is.list(data_item) &&
+        all(c("data_item", "data_function") %in% names(data_item))) {
+        row_names[i] <- row_names[i] %|% deparse(UQE(details_item)[[2L]])
+        if (!is.null(data_item$data) ||
+            !is.null(UQE(data_item$data_filter))) {
+          row_data <- data_item$data %||% data
+          if (!is.null(UQE(data_item$data_filter))) {
+            row_data <- filter(row_data, !!data_item$data_filter)
+          }
+          row_item <- eval_tidy(data_item$data_item, row_data)
+          current_col_item <- as.factor(eval_tidy(column_variable, row_data))
+        } else {
+          row_item <- eval_tidy(data_item$data_item, data)
+          current_col_item <- col_item
+        }
+    } else {
+      row_item <- data_item
+      current_col_item <- col_item
+      row_names[i] <- row_names[i] %|% deparse(UQE(details_item))
+      if (is.numeric(data_item)) {
+        data_item <- wilcox_row(!!details_item)
+      } else if (is.logical(data_item)) {
+        data_item <- fisher_row(!!details_item, reference_level = "FALSE")
+      } else {
+        data_item <- fisher_row(!!details_item)
+      }
+    }
+    row_function <- data_item$data_function
+
+    output_data <- row_function(row_item, current_col_item, digits, include_p)
+
+    row_output <- output_data$row_output
+    if (!is.array(row_output)) {
+      row_output <- matrix(c("", row_output), nrow = 1L)
+    }
+    pad_item <- function(item) {
+      mat <- matrix("", ncol = 1, nrow = nrow(row_output))
+      mat[1] <- item
+      mat
+    }
+    if (include_n) {
+      row_output <- cbind(pad_item(sum(!is.na(row_item))), row_output)
+    }
+    row_output <- cbind(pad_item(row_names[i]), row_output)
     if (include_p) {
-      output[[i]] <- cbind(output[[i]],
-        matrix(
-          c(
-            row_structure[[i]]$p_function(data, column_split, p_digits, small_p),
-            rep("", nrow(output_data) - 1L)
-          ),
-          nrow = nrow(output_data)
-        )
+      row_output <- cbind(
+        row_output,
+        pad_item(pretty_p(output_data$p, p_digits, small_p_format, small_p_cutoff))
       )
     }
+    output[[i]] <- row_output
   }
 
   output <- invoke(rbind, output)
 
-  col_names <- c("Variable", "Level")
+  col_names <- c("Variable")
   if (include_n) {
     col_names <- c(col_names, "n")
   }
+  col_names <- c(col_names, "Level")
   if (!is.null(UQE(column_variable))) {
-    col_names <- c(col_names, levels(column_split))
+    col_names <- c(col_names, levels(col_item))
   } else {
     col_names <- c(col_names, "Value")
   }

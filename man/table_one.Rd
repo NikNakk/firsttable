@@ -4,8 +4,9 @@
 \alias{table_one}
 \title{Table One}
 \usage{
-table_one(data, ..., column_variable = NULL, digits = 1, p_digits = 3,
-  small_p = c("<", "E", "x10"))
+table_one(data, ..., column_variable = NULL, digits = 1, include_p = TRUE,
+  p_digits = 3, small_p_format = c("<", "E", "x10"),
+  small_p_cutoff = 10^-p_digits, include_n = FALSE)
 }
 \arguments{
 \item{data}{`data.frame` or `tibble` to use as data source}
@@ -16,9 +17,15 @@ table_one(data, ..., column_variable = NULL, digits = 1, p_digits = 3,
 
 \item{digits}{digits used for formatting variables by default}
 
+\item{include_p}{whether to include p values in table}
+
 \item{p_digits}{digits used for formatting p values by default}
 
-\item{small_p}{format used for small p values}
+\item{small_p_format}{format for small p values}
+
+\item{small_p_cutoff}{cutoff for small p values}
+
+\item{include_n}{whether to include number of non-missing values for each row}
 }
 \value{
 character matrix with table

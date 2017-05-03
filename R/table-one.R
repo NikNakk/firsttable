@@ -5,8 +5,11 @@
 #' @param column_variable variable used for columns (if any)
 #' @param digits digits used for formatting variables by default
 #' @param p_digits digits used for formatting p values by default
-#' @param small_p format used for small p values
 #' @param ... row details
+#' @param include_p whether to include p values in table
+#' @param small_p_format format for small p values
+#' @param small_p_cutoff cutoff for small p values
+#' @param include_n whether to include number of non-missing values for each row
 #'
 #' @return character matrix with table
 #' @export
@@ -37,7 +40,7 @@ table_one <- function(data,
   output <- list_len(n_row)
 
   if (is.null(names(row_details))) {
-    row_names <- rep(NA_character_, length(row_structure))
+    row_names <- rep(NA_character_, length(row_details))
   } else {
     row_names <- names(row_details)
     row_names[row_names == ""] <- NA_character_
@@ -54,7 +57,8 @@ table_one <- function(data,
             !is.null(UQE(data_item$data_filter))) {
           row_data <- data_item$data %||% data
           if (!is.null(UQE(data_item$data_filter))) {
-            row_data <- filter(row_data, !!data_item$data_filter)
+            stopifnot(requireNamespace("dplyr"))
+            row_data <- dplyr::filter(row_data, !!data_item$data_filter)
           }
           row_item <- eval_tidy(data_item$data_item, row_data)
           current_col_item <- as.factor(eval_tidy(column_variable, row_data))

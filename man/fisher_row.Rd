@@ -2,20 +2,24 @@
 % Please edit documentation in R/row-functions.R
 \name{fisher_row}
 \alias{fisher_row}
-\title{Title}
+\title{Row using Fisher's exact test}
 \usage{
-fisher_row(data_item, row_digits = NULL, row_p_digits = NULL,
-  na.rm = TRUE)
+fisher_row(data_item, data = NULL, data_filter = NULL, row_digits = NULL,
+  na.rm = TRUE, reference_level = NULL)
 }
 \arguments{
 \item{data_item}{item to be taken from data for row}
 
+\item{data}{separate dataset to use}
+
+\item{data_filter}{filter to apply to dataset}
+
 \item{row_digits}{digits for data item (overrides table as a whole)}
 
-\item{row_p_digits}{digits for p value (overrides table as a whole)}
-
 \item{na.rm}{whether to include NA in the denominator for percentages}
+
+\item{reference_level}{a level of the variable to drop from display}
 }
 \description{
-Title
+Row using Fisher's exact test
 }

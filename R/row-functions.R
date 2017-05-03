@@ -6,8 +6,9 @@
 #'
 #' @param data_item item to be taken from data for row
 #' @param row_digits digits for data item (overrides table as a whole)
-#' @param row_p_digits digits for p value (overrides table as a whole)
 #' @param na.rm whether to remove NA before reporting median and quartiles
+#' @param data separate dataset to use
+#' @param data_filter filter to apply to dataset
 #'
 #' @export
 #'
@@ -25,7 +26,7 @@ wilcox_row <- function(data_item,
       list(
         row_output = med_iqr(row_item, col_item, digits, na.rm),
          p = if (include_p) {
-           wilcox.test(row_item ~ col_item)$p.value
+           stats::wilcox.test(row_item ~ col_item)$p.value
            } else {
              NULL
            }
@@ -41,7 +42,7 @@ med_iqr <- function(row_item, col_item, digits, na.rm) {
   quartiles <- tapply(
     row_item,
     col_item,
-    quantile,
+    stats::quantile,
     probs = seq(0.25, 0.75, 0.25),
     na.rm = na.rm,
     simplify = FALSE
@@ -63,6 +64,7 @@ med_iqr <- function(row_item, col_item, digits, na.rm) {
 #'
 #' @inheritParams wilcox_row
 #' @param na.rm whether to include NA in the denominator for percentages
+#' @param reference_level a level of the variable to drop from display
 #'
 #' @export
 #'
@@ -94,7 +96,7 @@ fisher_row <- function(data_item,
       list(
         row_output = output,
         p = if (include_p) {
-          fisher.test(tab)$p.value
+          stats::fisher.test(tab)$p.value
         } else {
           NULL
         }
@@ -113,28 +115,30 @@ fisher_row <- function(data_item,
 #' @return formatted p value
 #' @export
 #'
-#' @examples
 pretty_p <- function(p,
                      p_digits,
                      small_p_format = c("<", "E", "x10", "plotmath"),
                      small_p_cutoff = 10^-p_digits
                      ) {
   small_p_format <- match.arg(small_p_format)
-  small_p_func <- switch(
-    small_p_format,
-    `<` = function(p, p_digits) {
+  if (small_p_format == "<") {
+    small_p_func <- function(p, p_digits) {
       sprintf("<%.*f", p_digits, 10 ^ -p_digits)
-    },
-    `E` = function(p, p_digits) {
+    }
+  } else if (small_p_format == "E") {
+    small_p_func <- function(p, p_digits) {
       sprintf("%.1E", p)
-    },
-    `x10` = function(p, p_digits) {
+    }
+  } else if (small_p_format == "x10") {
+    small_p_func <- function(p, p_digits) {
       sub("E(-?)\\+?0?(\\d+)", "x10^\\1\\2", sprintf("%.1E", p))
-    },
-    plotmath = function(p, p_digits) {
+    }
+  } else if (small_p_format == "plotmath") {
+    small_p_func <- function(p, p_digits) {
       sub("E(-?)\\+?0?(\\d+)", "%*% 10^\\1\\2", sprintf("%.1E", p))
     }
-  )
+  }
+
   ifelse(
     p >= small_p_cutoff,
     sprintf("%.*f", p_digits, p),

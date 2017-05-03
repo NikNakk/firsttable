@@ -4,15 +4,17 @@
 \alias{wilcox_row}
 \title{Wilcox test row}
 \usage{
-wilcox_row(data_item, row_digits = NULL, row_p_digits = NULL,
+wilcox_row(data_item, data = NULL, data_filter = NULL, row_digits = NULL,
   na.rm = TRUE)
 }
 \arguments{
 \item{data_item}{item to be taken from data for row}
 
-\item{row_digits}{digits for data item (overrides table as a whole)}
+\item{data}{separate dataset to use}
 
-\item{row_p_digits}{digits for p value (overrides table as a whole)}
+\item{data_filter}{filter to apply to dataset}
+
+\item{row_digits}{digits for data item (overrides table as a whole)}
 
 \item{na.rm}{whether to remove NA before reporting median and quartiles}
 }

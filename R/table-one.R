@@ -39,12 +39,8 @@ table_one <- function(data,
 
   output <- list_len(n_row)
 
-  if (is.null(names(row_details))) {
-    row_names <- rep(NA_character_, length(row_details))
-  } else {
-    row_names <- names(row_details)
-    row_names[row_names == ""] <- NA_character_
-  }
+  row_names <- names(row_details)
+  row_names[row_names == ""] <- NA_character_
 
   for (i in seq_along(row_details)) {
     details_item <- row_details[[i]]

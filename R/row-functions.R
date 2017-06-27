@@ -196,6 +196,6 @@ pretty_p <- function(p,
   ifelse(
     p >= small_p_cutoff,
     sprintf("%.*f", p_digits, p),
-    small_p_func(p, p_digits)
+    small_p_func(p, small_p_cutoff)
   )
 }

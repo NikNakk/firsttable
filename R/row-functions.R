@@ -73,7 +73,8 @@ fisher_row <- function(data_item,
                        data_filter = NULL,
                        row_digits = NULL,
                        na.rm = TRUE,
-                       reference_level = NULL) {
+                       reference_level = NULL,
+                       include_reference = FALSE) {
   list(
     data_item = enquo(data_item),
     data = data,
@@ -90,6 +91,9 @@ fisher_row <- function(data_item,
       )
       dim(output) <- dim(tab)
       output <- cbind(rownames(tab), output)
+      if (include_reference && is.null(reference_level)) {
+        reference_level <- rownames(tab)[1]
+      }
       if (!is.null(reference_level)) {
         output <- output[rownames(tab) != reference_level, , drop = FALSE]
       }
@@ -144,9 +148,10 @@ coxph_row <- function(data_item,
         cis[, 1, drop = TRUE],
         cis[, 2, drop = TRUE]
       )
-      if (include_reference & !identical(levs, "")) {
+      if (include_reference & !identical(levs, "") & !is.logical(row_item)) {
         output <- c("Reference", output)
         levs <- c(levels(as.factor(row_item))[1L], levs)
+        ps <- c(NA, ps)
       }
       list(row_output = cbind(levs, output),
            p = ps)
@@ -194,8 +199,12 @@ pretty_p <- function(p,
   }
 
   ifelse(
-    p >= small_p_cutoff,
-    sprintf("%.*f", p_digits, p),
-    small_p_func(p, small_p_cutoff)
+    is.na(p) | p == "",
+    "",
+    ifelse(
+      p >= small_p_cutoff,
+      sprintf("%.*f", p_digits, p),
+      small_p_func(p, small_p_cutoff)
+    )
   )
 }

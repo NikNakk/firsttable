@@ -4,7 +4,7 @@
 \alias{pretty_p}
 \title{Format p values for display}
 \usage{
-pretty_p(p, p_digits, small_p_format = c("<", "E", "x10", "plotmath"),
+pretty_p(p, p_digits, small_p_format = c("<", "E", "x10", "plotmath", "html"),
   small_p_cutoff = 10^-p_digits)
 }
 \arguments{

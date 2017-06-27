@@ -5,7 +5,7 @@
 \title{Table One}
 \usage{
 table_one(data, ..., column_variable = NULL, digits = 1, include_p = TRUE,
-  p_digits = 3, small_p_format = c("<", "E", "x10"),
+  p_digits = 3, small_p_format = c("<", "E", "x10", "html"),
   small_p_cutoff = 10^-p_digits, include_n = FALSE)
 }
 \arguments{

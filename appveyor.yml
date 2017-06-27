@@ -17,9 +17,9 @@ environment:
 # Adapt as necessary starting from here
 
 build_script:
+  - travis-tool.sh install_github r-pkgs/remotes
   - travis-tool.sh install_github tidyverse/dplyr
   - travis-tool.sh install_deps
-
 
 test_script:
   - travis-tool.sh run_tests

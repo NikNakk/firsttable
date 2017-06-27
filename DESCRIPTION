@@ -1,4 +1,5 @@
 Package: tableone
+Encoding: UTF-8
 Title: Generates A Table In The Style of Table One From A Medical Paper
 Version: 0.0.0.9000
 Authors@R: person("Nick", "Kennedy", email = "r@nick-kennedy.com", role = c("aut", "cre"))
@@ -8,8 +9,8 @@ Description: tableone generates a table in the style of Table 1 from a medical
 Depends: R (>= 3.3.3)
 Imports: rlang
 License: GPL-3
-Encoding: UTF-8
 LazyData: true
 RoxygenNote: 6.0.1
 Suggests: testthat,
-  dplyr
+  dplyr,
+  survival

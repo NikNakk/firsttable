@@ -21,17 +21,15 @@ table_one <- function(data,
                       digits = 1,
                       include_p = TRUE,
                       p_digits = 3,
-                      small_p_format = c("<", "E", "x10"),
+                      small_p_format = c("<", "E", "x10", "html"),
                       small_p_cutoff = 10 ^ -p_digits,
                       include_n = FALSE) {
   row_details <- quos(...)
   small_p_format <- match.arg(small_p_format)
 
   column_variable <- enquo(column_variable)
-  if (!is.null(UQE(column_variable))) {
-    col_item <- as.factor(eval_tidy(column_variable, data))
-  } else {
-    col_item <- factor(rep(1, nrow(data)))
+  col_item <- get_column_item(column_variable, data)
+  if (is.null(UQE(column_variable))) {
     include_p <- FALSE
   }
   n_row <- length(row_details)
@@ -57,7 +55,7 @@ table_one <- function(data,
             row_data <- dplyr::filter(row_data, !!data_item$data_filter)
           }
           row_item <- eval_tidy(data_item$data_item, row_data)
-          current_col_item <- as.factor(eval_tidy(column_variable, row_data))
+          current_col_item <- get_column_item(column_variable, row_data)
         } else {
           row_item <- eval_tidy(data_item$data_item, data)
           current_col_item <- col_item
@@ -66,7 +64,9 @@ table_one <- function(data,
       row_item <- data_item
       current_col_item <- col_item
       row_names[i] <- row_names[i] %|% deparse(UQE(details_item))
-      if (is.numeric(data_item)) {
+      if (inherits(col_item, "Surv")) {
+        data_item <- coxph_row(!!details_item)
+      } else if (is.numeric(data_item)) {
         data_item <- wilcox_row(!!details_item)
       } else if (is.logical(data_item)) {
         data_item <- fisher_row(!!details_item, reference_level = "FALSE")
@@ -84,7 +84,7 @@ table_one <- function(data,
     }
     pad_item <- function(item) {
       mat <- matrix("", ncol = 1, nrow = nrow(row_output))
-      mat[1] <- item
+      mat[1:length(item)] <- item
       mat
     }
     if (include_n) {
@@ -108,7 +108,11 @@ table_one <- function(data,
   }
   col_names <- c(col_names, "Level")
   if (!is.null(UQE(column_variable))) {
-    col_names <- c(col_names, levels(col_item))
+    if (!inherits(col_item, "Surv")) {
+      col_names <- c(col_names, levels(col_item))
+    } else {
+      col_names <- c(col_names, "Hazard ratio (95% CI)")
+    }
   } else {
     col_names <- c(col_names, "Value")
   }
@@ -117,4 +121,17 @@ table_one <- function(data,
   }
   colnames(output) <- col_names
   output
+}
+
+get_column_item <- function(column_variable, data) {
+  if (!is.null(UQE(column_variable))) {
+    col_item <- eval_tidy(column_variable, data)
+    if (inherits(col_item, "Surv")) {
+      col_item
+    } else {
+      as.factor(col_item)
+    }
+  } else {
+    col_item <- factor(rep(1, nrow(data)))
+  }
 }

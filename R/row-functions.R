@@ -105,6 +105,56 @@ fisher_row <- function(data_item,
   )
 }
 
+#' Cox Proportional Hazards Row
+#'
+#' @inheritParams wilcox_row
+#' @param row_digits Number of digits to include in the OR
+#' @param include_reference whether to include a row for the reference level of
+#'   a factor
+#'
+#' @return row for inclusion in `table_one`
+#' @export
+#'
+coxph_row <- function(data_item,
+                      data = NULL,
+                      data_filter = NULL,
+                      row_digits = NULL,
+                      include_reference = TRUE) {
+  stopifnot(requireNamespace("survival"))
+  list(
+    data_item = enquo(data_item),
+    data = data,
+    data_filter = enquo(data_filter),
+    data_function = function(row_item, col_item, digits, include_p) {
+      digits <- row_digits %||% digits
+      model <- survival::coxph(col_item ~ row_item)
+      hrs <- exp(coef(model))
+      cis <- exp(confint(model))
+      ps <- summary(model)$coefficients[, "Pr(>|z|)", drop = TRUE]
+      if (names(hrs)[1L] == "row_item") {
+        levs <- ""
+        cis <- matrix(cis, ncol = 2)
+      } else {
+        levs <- sub("row_item", "", names(hrs))
+      }
+      output <- sprintf(
+        "%2$.*1$f (%3$.*1$f - %4$.*1$f)",
+        digits,
+        hrs,
+        cis[, 1, drop = TRUE],
+        cis[, 2, drop = TRUE]
+      )
+      if (include_reference & !identical(levs, "")) {
+        output <- c("Reference", output)
+        levs <- c(levels(as.factor(row_item))[1L], levs)
+      }
+      list(row_output = cbind(levs, output),
+           p = ps)
+    }
+  )
+
+}
+
 #' Format p values for display
 #'
 #' @param p p value to format
@@ -117,25 +167,29 @@ fisher_row <- function(data_item,
 #'
 pretty_p <- function(p,
                      p_digits,
-                     small_p_format = c("<", "E", "x10", "plotmath"),
+                     small_p_format = c("<", "E", "x10", "plotmath", "html"),
                      small_p_cutoff = 10^-p_digits
                      ) {
   small_p_format <- match.arg(small_p_format)
   if (small_p_format == "<") {
-    small_p_func <- function(p, p_digits) {
-      sprintf("<%.*f", p_digits, 10 ^ -p_digits)
+    small_p_func <- function(p, small_p_cutoff) {
+      sprintf("<%.*f", p_digits, small_p_cutoff)
     }
   } else if (small_p_format == "E") {
-    small_p_func <- function(p, p_digits) {
+    small_p_func <- function(p, small_p_cutoff) {
       sprintf("%.1E", p)
     }
   } else if (small_p_format == "x10") {
-    small_p_func <- function(p, p_digits) {
+    small_p_func <- function(p, small_p_cutoff) {
       sub("E(-?)\\+?0?(\\d+)", "x10^\\1\\2", sprintf("%.1E", p))
     }
   } else if (small_p_format == "plotmath") {
-    small_p_func <- function(p, p_digits) {
-      sub("E(-?)\\+?0?(\\d+)", "%*% 10^\\1\\2", sprintf("%.1E", p))
+    small_p_func <- function(p, small_p_cutoff) {
+      sub("E(-?)\\+?0?(\\d+)", " %*% 10^\\1\\2", sprintf("%.1E", p))
+    }
+  } else if (small_p_format == "html") {
+    small_p_func <- function(p, small_p_cutoff) {
+      sub("E(-?)\\+?0?(\\d+)", "×10<sup>\\1\\2</sup>", sprintf("%.1E", p))
     }
   }
 

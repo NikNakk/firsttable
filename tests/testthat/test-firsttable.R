@@ -4,7 +4,7 @@ test_that(
     mtcars_6_8 <- subset(mtcars, cyl %in% c(6, 8))
     mtcars_6_8 <- mtcars_6_8[!duplicated(mtcars_6_8$mpg), ]
     expect_equal(
-      table_one(mtcars_6_8, mpg, factor(gear), am == 0),
+      first_table(mtcars_6_8, mpg, factor(gear), am == 0),
       structure(
         c(
           "mpg",
@@ -29,7 +29,7 @@ test_that(
     )
 
     expect_equal(
-      table_one(mtcars_6_8,
+      first_table(mtcars_6_8,
                 column_variable = cyl,
                 "Miles per gallon" = wilcox_row(mpg, row_digits = 2),
                 "Transmission" = fisher_row(am, reference_level = 0)),
@@ -52,7 +52,7 @@ test_that(
     )
 
     expect_equal(
-      table_one(mtcars_6_8,
+      first_table(mtcars_6_8,
                 column_variable = cyl,
                 include_n = TRUE,
                 "MPG 3 gears" = wilcox_row(mpg, data_filter = gear == 3)),

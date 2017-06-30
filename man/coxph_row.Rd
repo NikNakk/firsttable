@@ -20,7 +20,7 @@ coxph_row(data_item, data = NULL, data_filter = NULL, row_digits = NULL,
 a factor}
 }
 \value{
-row for inclusion in `table_one`
+row for inclusion in `first_table`
 }
 \description{
 Cox Proportional Hazards Row

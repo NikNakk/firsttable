@@ -116,7 +116,7 @@ fisher_row <- function(data_item,
 #' @param include_reference whether to include a row for the reference level of
 #'   a factor
 #'
-#' @return row for inclusion in `table_one`
+#' @return row for inclusion in `first_table`
 #' @export
 #'
 coxph_row <- function(data_item,

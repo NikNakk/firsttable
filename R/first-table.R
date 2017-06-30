@@ -15,7 +15,7 @@
 #' @export
 #' @import rlang
 #'
-table_one <- function(data,
+first_table <- function(data,
                       ...,
                       column_variable = NULL,
                       digits = 1,

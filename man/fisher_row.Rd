@@ -5,7 +5,7 @@
 \title{Row using Fisher's exact test}
 \usage{
 fisher_row(data_item, data = NULL, data_filter = NULL, row_digits = NULL,
-  na.rm = TRUE, reference_level = NULL)
+  na.rm = TRUE, reference_level = NULL, include_reference = FALSE)
 }
 \arguments{
 \item{data_item}{item to be taken from data for row}

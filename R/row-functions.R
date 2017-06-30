@@ -65,6 +65,8 @@ med_iqr <- function(row_item, col_item, digits, na.rm) {
 #' @inheritParams wilcox_row
 #' @param na.rm whether to include NA in the denominator for percentages
 #' @param reference_level a level of the variable to drop from display
+#' @param include_reference whether to include the first level of the factor
+#'        in the report
 #'
 #' @export
 #'
@@ -74,7 +76,7 @@ fisher_row <- function(data_item,
                        row_digits = NULL,
                        na.rm = TRUE,
                        reference_level = NULL,
-                       include_reference = FALSE) {
+                       include_reference = TRUE) {
   list(
     data_item = enquo(data_item),
     data = data,
@@ -91,7 +93,7 @@ fisher_row <- function(data_item,
       )
       dim(output) <- dim(tab)
       output <- cbind(rownames(tab), output)
-      if (include_reference && is.null(reference_level)) {
+      if (!include_reference && is.null(reference_level)) {
         reference_level <- rownames(tab)[1]
       }
       if (!is.null(reference_level)) {
@@ -132,8 +134,8 @@ coxph_row <- function(data_item,
     data_function = function(row_item, col_item, digits, include_p) {
       digits <- row_digits %||% digits
       model <- survival::coxph(col_item ~ row_item)
-      hrs <- exp(coef(model))
-      cis <- exp(confint(model))
+      hrs <- exp(stats::coef(model))
+      cis <- exp(stats::confint(model))
       ps <- summary(model)$coefficients[, "Pr(>|z|)", drop = TRUE]
       if (names(hrs)[1L] == "row_item") {
         levs <- ""
@@ -194,7 +196,7 @@ pretty_p <- function(p,
     }
   } else if (small_p_format == "html") {
     small_p_func <- function(p, small_p_cutoff) {
-      sub("E(-?)\\+?0?(\\d+)", "×10<sup>\\1\\2</sup>", sprintf("%.1E", p))
+      sub("E(-?)\\+?0?(\\d+)", "\U00D710<sup>\\1\\2</sup>", sprintf("%.1E", p))
     }
   }
 

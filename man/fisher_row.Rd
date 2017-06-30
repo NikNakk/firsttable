@@ -5,7 +5,7 @@
 \title{Row using Fisher's exact test}
 \usage{
 fisher_row(data_item, data = NULL, data_filter = NULL, row_digits = NULL,
-  na.rm = TRUE, reference_level = NULL, include_reference = FALSE)
+  na.rm = TRUE, reference_level = NULL, include_reference = TRUE)
 }
 \arguments{
 \item{data_item}{item to be taken from data for row}
@@ -19,6 +19,9 @@ fisher_row(data_item, data = NULL, data_filter = NULL, row_digits = NULL,
 \item{na.rm}{whether to include NA in the denominator for percentages}
 
 \item{reference_level}{a level of the variable to drop from display}
+
+\item{include_reference}{whether to include the first level of the factor
+in the report}
 }
 \description{
 Row using Fisher's exact test

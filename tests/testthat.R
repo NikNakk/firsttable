@@ -1,4 +1,4 @@
 library(testthat)
-library(tableone)
+library(firsttable)
 
-test_check("tableone")
+test_check("firsttable")

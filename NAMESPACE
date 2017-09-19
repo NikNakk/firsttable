@@ -3,6 +3,7 @@
 export(coxph_row)
 export(first_table)
 export(fisher_row)
+export(kruskal_row)
 export(pretty_p)
 export(wilcox_row)
 import(rlang)

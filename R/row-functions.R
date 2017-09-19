@@ -57,6 +57,41 @@ med_iqr <- function(row_item, col_item, digits, na.rm) {
   )
 }
 
+# kruskal_row --------------------------------------------------------------
+
+#' Kruskal Wallis test row
+#'
+#' @param data_item item to be taken from data for row
+#' @param row_digits digits for data item (overrides table as a whole)
+#' @param na.rm whether to remove NA before reporting median and quartiles
+#' @param data separate dataset to use
+#' @param data_filter filter to apply to dataset
+#'
+#' @export
+#'
+kruskal_row <- function(data_item,
+                       data = NULL,
+                       data_filter = NULL,
+                       row_digits = NULL,
+                       na.rm = TRUE) {
+  list(
+    data_item = enquo(data_item),
+    data = data,
+    data_filter = enquo(data_filter),
+    data_function = function(row_item, col_item, digits, include_p) {
+      digits <- row_digits %||% digits
+      list(
+        row_output = med_iqr(row_item, col_item, digits, na.rm),
+        p = if (include_p) {
+          stats::kruskal.test(row_item ~ col_item)$p.value
+        } else {
+          NULL
+        }
+      )
+    }
+  )
+}
+
 
 # fisher_row --------------------------------------------------------------
 
@@ -196,7 +231,7 @@ pretty_p <- function(p,
     }
   } else if (small_p_format == "html") {
     small_p_func <- function(p, small_p_cutoff) {
-      sub("E(-?)\\+?0?(\\d+)", "\U00D710<sup>\\1\\2</sup>", sprintf("%.1E", p))
+      sub("E(-?)\\+?0?(\\d+)", "\u00D710<sup>\\1\\2</sup>", sprintf("%.1E", p))
     }
   }
 

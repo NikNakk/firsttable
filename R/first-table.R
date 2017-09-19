@@ -67,7 +67,11 @@ first_table <- function(data,
       if (inherits(col_item, "Surv")) {
         data_item <- coxph_row(!!details_item)
       } else if (is.numeric(data_item)) {
-        data_item <- wilcox_row(!!details_item)
+        if (length(unique(current_col_item)) <= 2) {
+          data_item <- wilcox_row(!!details_item)
+        } else {
+          data_item <- kruskal_row(!!details_item)
+        }
       } else if (is.logical(data_item)) {
         data_item <- fisher_row(!!details_item, reference_level = "FALSE")
       } else {

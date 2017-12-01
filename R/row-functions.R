@@ -23,14 +23,16 @@ wilcox_row <- function(data_item,
     data_filter = enquo(data_filter),
     data_function = function(row_item, col_item, digits, include_p) {
       digits <- row_digits %||% digits
-      list(
-        row_output = med_iqr(row_item, col_item, digits, na.rm),
-         p = if (include_p) {
-           stats::wilcox.test(row_item ~ col_item)$p.value
+      list(row_output = med_iqr(row_item, col_item, digits, na.rm),
+           p = if (include_p) {
+             if (length(unique(col_item[!is.na(row_item)])) == 2L) {
+               stats::wilcox.test(row_item ~ col_item)$p.value
+             } else {
+               NA_real_
+             }
            } else {
              NULL
-           }
-        )
+           })
     }
   )
 }

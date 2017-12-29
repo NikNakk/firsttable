@@ -2,11 +2,12 @@
 % Please edit documentation in R/first-table.R
 \name{first_table}
 \alias{first_table}
-\title{Table One}
+\title{First Table}
 \usage{
 first_table(data, ..., column_variable = NULL, digits = 1,
   include_p = TRUE, p_digits = 3, small_p_format = c("<", "E", "x10",
-  "html"), small_p_cutoff = 10^-p_digits, include_n = FALSE)
+  "html"), small_p_cutoff = 10^-p_digits, include_n = FALSE,
+  include_n_per_col = FALSE)
 }
 \arguments{
 \item{data}{`data.frame` or `tibble` to use as data source}
@@ -26,10 +27,12 @@ first_table(data, ..., column_variable = NULL, digits = 1,
 \item{small_p_cutoff}{cutoff for small p values}
 
 \item{include_n}{whether to include number of non-missing values for each row}
+
+\item{include_n_per_col}{whether to include the number of individuals in each column}
 }
 \value{
 character matrix with table
 }
 \description{
-Table One
+First Table
 }

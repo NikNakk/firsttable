@@ -1,5 +1,5 @@
 
-#' Table One
+#' First Table
 #'
 #' @param data `data.frame` or `tibble` to use as data source
 #' @param column_variable variable used for columns (if any)
@@ -10,6 +10,7 @@
 #' @param small_p_format format for small p values
 #' @param small_p_cutoff cutoff for small p values
 #' @param include_n whether to include number of non-missing values for each row
+#' @param include_n_per_col whether to include the number of individuals in each column
 #'
 #' @return character matrix with table
 #' @export
@@ -23,7 +24,8 @@ first_table <- function(data,
                       p_digits = 3,
                       small_p_format = c("<", "E", "x10", "html"),
                       small_p_cutoff = 10 ^ -p_digits,
-                      include_n = FALSE) {
+                      include_n = FALSE,
+                      include_n_per_col = FALSE) {
   row_details <- quos(...)
   small_p_format <- match.arg(small_p_format)
 
@@ -46,7 +48,8 @@ first_table <- function(data,
     if (is.call(details_item[[2L]]) &&
         is.list(data_item) &&
         all(c("data_item", "data_function") %in% names(data_item))) {
-        row_names[i] <- row_names[i] %|% deparse(UQE(details_item)[[2L]])
+        row_names[i] <- row_names[i] %|%
+          paste(trimws(deparse(UQE(details_item)[[2L]], width.cutoff = 500)), collapse = " ")
         if (!is.null(data_item$data) ||
             !is.null(UQE(data_item$data_filter))) {
           row_data <- data_item$data %||% data
@@ -63,7 +66,8 @@ first_table <- function(data,
     } else {
       row_item <- data_item
       current_col_item <- col_item
-      row_names[i] <- row_names[i] %|% deparse(UQE(details_item))
+      row_names[i] <- row_names[i] %|%
+        paste(trimws(deparse(UQE(details_item), width.cutoff = 500)), collapse = " ")
       if (inherits(col_item, "Surv")) {
         data_item <- coxph_row(!!details_item)
       } else if (is.numeric(data_item)) {
@@ -124,6 +128,15 @@ first_table <- function(data,
     col_names <- c(col_names, "p")
   }
   colnames(output) <- col_names
+
+  if (include_n_per_col && n_col >= 1) {
+    row_with_n <- matrix("", ncol = ncol(output), nrow = 1)
+    colnames(row_with_n) <- col_names
+    row_with_n[1, "Variable"] <- "n"
+    row_with_n[1, levels(col_item)] <- table(col_item)[levels(col_item)]
+    output <- rbind(row_with_n, output)
+  }
+
   output
 }
 

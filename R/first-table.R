@@ -11,6 +11,7 @@
 #' @param small_p_cutoff cutoff for small p values
 #' @param include_n whether to include number of non-missing values for each row
 #' @param include_n_per_col whether to include the number of individuals in each column
+#' @param workspace default workspace passed onto \code{\link[stats]{fisher.test}}
 #'
 #' @return character matrix with table
 #' @export
@@ -25,7 +26,8 @@ first_table <- function(data,
                       small_p_format = c("<", "E", "x10", "html"),
                       small_p_cutoff = 10 ^ -p_digits,
                       include_n = FALSE,
-                      include_n_per_col = FALSE) {
+                      include_n_per_col = FALSE,
+                      workspace = 2e5) {
   row_details <- quos(...)
   small_p_format <- match.arg(small_p_format)
 
@@ -77,9 +79,9 @@ first_table <- function(data,
           data_item <- kruskal_row(!!details_item)
         }
       } else if (is.logical(data_item)) {
-        data_item <- fisher_row(!!details_item, reference_level = "FALSE")
+        data_item <- fisher_row(!!details_item, reference_level = "FALSE", workspace = workspace)
       } else {
-        data_item <- fisher_row(!!details_item)
+        data_item <- fisher_row(!!details_item, workspace = workspace)
       }
     }
     row_function <- data_item$data_function

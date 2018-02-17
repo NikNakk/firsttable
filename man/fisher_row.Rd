@@ -5,7 +5,8 @@
 \title{Row using Fisher's exact test}
 \usage{
 fisher_row(data_item, data = NULL, data_filter = NULL, row_digits = NULL,
-  na.rm = TRUE, reference_level = NULL, include_reference = TRUE)
+  na.rm = TRUE, reference_level = NULL, include_reference = TRUE,
+  workspace = 2e+05)
 }
 \arguments{
 \item{data_item}{item to be taken from data for row}
@@ -22,6 +23,8 @@ fisher_row(data_item, data = NULL, data_filter = NULL, row_digits = NULL,
 
 \item{include_reference}{whether to include the first level of the factor
 in the report}
+
+\item{workspace}{passed onto \code{\link[stats]{fisher.test}}}
 }
 \description{
 Row using Fisher's exact test

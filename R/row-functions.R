@@ -104,7 +104,7 @@ kruskal_row <- function(data_item,
 #' @param reference_level a level of the variable to drop from display
 #' @param include_reference whether to include the first level of the factor
 #'        in the report
-#' @param workspace passed onto \{code\{link[stats]}fisher.test}
+#' @param workspace passed onto \code{\link[stats]{fisher.test}}
 #'
 #' @export
 #'

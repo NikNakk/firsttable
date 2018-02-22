@@ -69,7 +69,7 @@ first_table <- function(data,
       row_item <- data_item
       current_col_item <- col_item
       row_names[i] <- row_names[i] %|%
-        paste(trimws(deparse(UQE(details_item), width.cutoff = 500)), collapse = " ")
+        paste(trimws(deparse(get_expr(details_item), width.cutoff = 500)), collapse = " ")
       if (inherits(col_item, "Surv")) {
         data_item <- coxph_row(!!details_item)
       } else if (is.numeric(data_item)) {
@@ -117,7 +117,7 @@ first_table <- function(data,
     col_names <- c(col_names, "n")
   }
   col_names <- c(col_names, "Level")
-  if (!is.null(UQE(column_variable))) {
+  if (!is.null(get_expr(column_variable))) {
     if (!inherits(col_item, "Surv")) {
       col_names <- c(col_names, levels(col_item))
     } else {

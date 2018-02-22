@@ -33,7 +33,7 @@ first_table <- function(data,
 
   column_variable <- enquo(column_variable)
   col_item <- get_column_item(column_variable, data)
-  if (is.null(UQE(column_variable))) {
+  if (is.null(get_expr(column_variable))) {
     include_p <- FALSE
   }
   n_row <- length(row_details)
@@ -51,11 +51,11 @@ first_table <- function(data,
         is.list(data_item) &&
         all(c("data_item", "data_function") %in% names(data_item))) {
         row_names[i] <- row_names[i] %|%
-          paste(trimws(deparse(UQE(details_item)[[2L]], width.cutoff = 500)), collapse = " ")
+          paste(trimws(deparse(get_expr(details_item)[[2L]], width.cutoff = 500)), collapse = " ")
         if (!is.null(data_item$data) ||
-            !is.null(UQE(data_item$data_filter))) {
+            !is.null(get_expr(data_item$data_filter))) {
           row_data <- data_item$data %||% data
-          if (!is.null(UQE(data_item$data_filter))) {
+          if (!is.null(get_expr(data_item$data_filter))) {
             stopifnot(requireNamespace("dplyr"))
             row_data <- dplyr::filter(row_data, !!data_item$data_filter)
           }
@@ -143,7 +143,7 @@ first_table <- function(data,
 }
 
 get_column_item <- function(column_variable, data) {
-  if (!is.null(UQE(column_variable))) {
+  if (!is.null(get_expr(column_variable))) {
     col_item <- eval_tidy(column_variable, data)
     if (inherits(col_item, "Surv")) {
       col_item

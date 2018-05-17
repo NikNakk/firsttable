@@ -7,7 +7,7 @@
 first_table(data, ..., column_variable = NULL, digits = 1,
   include_p = TRUE, p_digits = 3, small_p_format = c("<", "E", "x10",
   "html"), small_p_cutoff = 10^-p_digits, include_n = FALSE,
-  include_n_per_col = FALSE)
+  include_n_per_col = FALSE, workspace = 2e+05)
 }
 \arguments{
 \item{data}{`data.frame` or `tibble` to use as data source}
@@ -29,6 +29,8 @@ first_table(data, ..., column_variable = NULL, digits = 1,
 \item{include_n}{whether to include number of non-missing values for each row}
 
 \item{include_n_per_col}{whether to include the number of individuals in each column}
+
+\item{workspace}{default workspace passed onto \code{\link[stats]{fisher.test}}}
 }
 \value{
 character matrix with the requested rows and columns

@@ -11,6 +11,7 @@
 #' @param small_p_cutoff cutoff for small p values
 #' @param include_n whether to include number of non-missing values for each row
 #' @param include_n_per_col whether to include the number of individuals in each column
+#' @param workspace default workspace passed onto \code{\link[stats]{fisher.test}}
 #'
 #' @return character matrix with the requested rows and columns
 #'
@@ -43,13 +44,14 @@ first_table <- function(data,
                       small_p_format = c("<", "E", "x10", "html"),
                       small_p_cutoff = 10 ^ -p_digits,
                       include_n = FALSE,
-                      include_n_per_col = FALSE) {
+                      include_n_per_col = FALSE,
+                      workspace = 2e5) {
   row_details <- quos(...)
   small_p_format <- match.arg(small_p_format)
 
   column_variable <- enquo(column_variable)
   col_item <- get_column_item(column_variable, data)
-  if (is.null(UQE(column_variable))) {
+  if (is.null(get_expr(column_variable))) {
     include_p <- FALSE
   }
   n_row <- length(row_details)
@@ -67,11 +69,11 @@ first_table <- function(data,
         is.list(data_item) &&
         all(c("data_item", "data_function") %in% names(data_item))) {
         row_names[i] <- row_names[i] %|%
-          paste(trimws(deparse(UQE(details_item)[[2L]], width.cutoff = 500)), collapse = " ")
+          paste(trimws(deparse(get_expr(details_item)[[2L]], width.cutoff = 500)), collapse = " ")
         if (!is.null(data_item$data) ||
-            !is.null(UQE(data_item$data_filter))) {
+            !is.null(get_expr(data_item$data_filter))) {
           row_data <- data_item$data %||% data
-          if (!is.null(UQE(data_item$data_filter))) {
+          if (!is.null(get_expr(data_item$data_filter))) {
             stopifnot(requireNamespace("dplyr"))
             row_data <- dplyr::filter(row_data, !!data_item$data_filter)
           }
@@ -85,7 +87,7 @@ first_table <- function(data,
       row_item <- data_item
       current_col_item <- col_item
       row_names[i] <- row_names[i] %|%
-        paste(trimws(deparse(UQE(details_item), width.cutoff = 500)), collapse = " ")
+        paste(trimws(deparse(get_expr(details_item), width.cutoff = 500)), collapse = " ")
       if (inherits(col_item, "Surv")) {
         data_item <- coxph_row(!!details_item)
       } else if (is.numeric(data_item)) {
@@ -95,9 +97,9 @@ first_table <- function(data,
           data_item <- kruskal_row(!!details_item)
         }
       } else if (is.logical(data_item)) {
-        data_item <- fisher_row(!!details_item, reference_level = "FALSE")
+        data_item <- fisher_row(!!details_item, reference_level = "FALSE", workspace = workspace)
       } else {
-        data_item <- fisher_row(!!details_item)
+        data_item <- fisher_row(!!details_item, workspace = workspace)
       }
     }
     row_function <- data_item$data_function
@@ -133,7 +135,7 @@ first_table <- function(data,
     col_names <- c(col_names, "n")
   }
   col_names <- c(col_names, "Level")
-  if (!is.null(UQE(column_variable))) {
+  if (!is.null(get_expr(column_variable))) {
     if (!inherits(col_item, "Surv")) {
       col_names <- c(col_names, levels(col_item))
     } else {
@@ -159,7 +161,7 @@ first_table <- function(data,
 }
 
 get_column_item <- function(column_variable, data) {
-  if (!is.null(UQE(column_variable))) {
+  if (!is.null(get_expr(column_variable))) {
     col_item <- eval_tidy(column_variable, data)
     if (inherits(col_item, "Surv")) {
       col_item

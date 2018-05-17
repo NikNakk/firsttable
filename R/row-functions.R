@@ -104,6 +104,7 @@ kruskal_row <- function(data_item,
 #' @param reference_level a level of the variable to drop from display
 #' @param include_reference whether to include the first level of the factor
 #'        in the report
+#' @param workspace passed onto \code{\link[stats]{fisher.test}}
 #'
 #' @export
 #'
@@ -113,7 +114,8 @@ fisher_row <- function(data_item,
                        row_digits = NULL,
                        na.rm = TRUE,
                        reference_level = NULL,
-                       include_reference = TRUE) {
+                       include_reference = TRUE,
+                       workspace = 2e5) {
   list(
     data_item = enquo(data_item),
     data = data,
@@ -139,7 +141,7 @@ fisher_row <- function(data_item,
       list(
         row_output = output,
         p = if (include_p) {
-          stats::fisher.test(tab)$p.value
+          stats::fisher.test(tab, workspace = workspace)$p.value
         } else {
           NULL
         }

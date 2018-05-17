@@ -31,8 +31,27 @@ first_table(data, ..., column_variable = NULL, digits = 1,
 \item{include_n_per_col}{whether to include the number of individuals in each column}
 }
 \value{
-character matrix with table
+character matrix with the requested rows and columns
 }
 \description{
 First Table
+}
+\details{
+This function takes a \code{\link[base]{data.frame}} or \code{\link[tibble]{tibble}}
+and a row and column specification and generates a table along the lines of the first table
+used in many medical journal articles. The row specification can either use one of the \code{_row}
+functions, or if the defaults are appropriate can just be a bare column name or calculation
+using a column. These calculations are implemented using \code{\link[rlang]{eval_tidy}} and
+support the \code{\link[rlang]{quasiquotation}} operators such as \code{\link[rlang]{!!}} and
+\code{\link[rlang]{!!!}}.
+
+The output is a character matrix which is formatted so as to work well with \code{\link[pander]{pander}}
+and \code{\link[knitr]{knit}}.
+}
+\examples{
+first_table(mtcars,
+  column_variable = cyl,
+  "Miles per gallon" = mpg,
+  "Transmission" = factor(am))
+
 }

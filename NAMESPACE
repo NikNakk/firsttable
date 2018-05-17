@@ -2,6 +2,8 @@
 
 export(coxph_row)
 export(first_table)
+export(first_table_default_options)
+export(first_table_row)
 export(fisher_row)
 export(kruskal_row)
 export(pretty_p)

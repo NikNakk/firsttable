@@ -30,7 +30,7 @@ test_that(
 
     expect_equal(
       first_table(mtcars_6_8,
-                column_variable = cyl,
+                .column_variable = cyl,
                 "Miles per gallon" = wilcox_row(mpg, row_digits = 2),
                 "Transmission" = fisher_row(am, reference_level = 0)),
       structure(
@@ -53,8 +53,8 @@ test_that(
 
     expect_equal(
       first_table(mtcars_6_8,
-                column_variable = cyl,
-                include_n = TRUE,
+                .column_variable = cyl,
+                .options = list(include_n = TRUE),
                 "MPG 3 gears" = wilcox_row(mpg, data_filter = gear == 3)),
       structure(
         c(

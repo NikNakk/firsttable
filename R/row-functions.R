@@ -175,7 +175,7 @@ coxph_row <- function(data_item,
       model <- survival::coxph(col_item ~ row_item)
       hrs <- exp(stats::coef(model))
       cis <- exp(stats::confint(model))
-      ps <- summary(model)$coefficients[, "Pr(>|z|)", drop = TRUE]
+      ps <- pchisq((summary(model)$coefficients[, "z", drop = TRUE]) ^ 2, 1, lower.tail = FALSE)
       if (names(hrs)[1L] == "row_item") {
         levs <- ""
         cis <- matrix(cis, ncol = 2)
@@ -247,5 +247,61 @@ pretty_p <- function(p,
       sprintf("%.*f", p_digits, p),
       small_p_func(p, small_p_cutoff)
     )
+  )
+}
+
+#' Row with type selected by firsttable
+
+#' @inheritParams wilcox_row
+#' @param include_reference whether to include a row for the reference level of
+#'   a factor
+#' @param include_reference whether to include the first level of the factor
+#'        in the report
+#' @param workspace passed onto \code{\link[stats]{fisher.test}}
+
+#' @import rlang
+#' @export
+
+first_table_row <- function(data_item,
+                           data = NULL,
+                           data_filter = NULL,
+                           row_digits = NULL,
+                           na.rm = TRUE,
+                           reference_level = NULL,
+                           include_reference = NULL,
+                           workspace = 2e5) {
+  data_item <- enquo(data_item)
+  data_filter <- enquo(data_filter)
+  list(
+    data_item = data_item,
+    data = data,
+    data_filter = data_filter,
+    data_function = function(row_item, col_item, digits, include_p) {
+      digits <- row_digits %||% digits
+      if (inherits(col_item, "Surv")) {
+        row_function <- coxph_row(!!data_item, data = data, data_filter = !!data_filter,
+                                  row_digits = row_digits,
+                                  include_reference = if (is.null(include_reference)) TRUE else include_reference)
+      } else if (is.numeric(row_item)) {
+        if (length(unique(col_item)) <= 2) {
+          row_function <- wilcox_row(!!data_item, data = data, data_filter = !!data_filter,
+                                     row_digits = row_digits, na.rm = na.rm)
+        } else {
+          row_function <- kruskal_row(!!data_item, data = data, data_filter = !!data_filter,
+                                      row_digits = row_digits, na.rm = na.rm)
+        }
+      } else if (is.logical(row_item)) {
+        row_function <- fisher_row(!!data_item, data = data, data_filter = !!data_filter, row_digits = row_digits,
+                                   na.rm = na.rm, reference_level = reference_level %||% "FALSE",
+                                   include_reference = if (is.null(include_reference)) FALSE else include_reference,
+                                   workspace = workspace)
+      } else {
+        row_function <- fisher_row(!!data_item, data = data, data_filter = !!data_filter, row_digits = row_digits,
+                                   na.rm = na.rm, reference_level = reference_level,
+                                   include_reference = if (is.null(include_reference)) TRUE else include_reference,
+                                   workspace = workspace)
+      }
+      row_function$data_function(row_item, col_item, digits, include_p)
+    }
   )
 }

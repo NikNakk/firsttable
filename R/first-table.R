@@ -1,18 +1,23 @@
+#' First Table default options
+#' @export
+first_table_default_options <-
+  list(
+    digits = 1,
+    include_p = TRUE,
+    p_digits = 3,
+    small_p_format = c("<", "E", "x10", "html"),
+    small_p_cutoff = NULL,
+    include_n = FALSE,
+    include_n_per_col = FALSE,
+    workspace = 2e5
+  )
 
 #' First Table
 #'
 #' @param data `data.frame` or `tibble` to use as data source
 #' @param column_variable variable used for columns (if any)
-#' @param digits digits used for formatting variables by default
-#' @param p_digits digits used for formatting p values by default
+#' @param .options options to use for formatting (see details)
 #' @param ... row details
-#' @param include_p whether to include p values in table
-#' @param small_p_format format for small p values
-#' @param small_p_cutoff cutoff for small p values
-#' @param include_n whether to include number of non-missing values for each row
-#' @param include_n_per_col whether to include the number of individuals in each column
-#' @param workspace default workspace passed onto \code{\link[stats]{fisher.test}}
-#'
 #' @return character matrix with the requested rows and columns
 #'
 #' @details This function takes a \code{\link[base]{data.frame}} or \code{\link[tibble]{tibble}}
@@ -22,6 +27,17 @@
 #' using a column. These calculations are implemented using \code{\link[rlang]{eval_tidy}} and
 #' support the \code{\link[rlang]{quasiquotation}} operators such as \code{\link[rlang]{!!}} and
 #' \code{\link[rlang]{!!!}}.
+#'
+#' Options are currently:
+#' \code{digits} digits used for formatting variables by default
+#' \code{p_digits} digits used for formatting p values by default
+#' \code{include_p} whether to include p values in table
+#' \code{small_p_format} format for small p values
+#' \code{small_p_cutoff} cutoff for small p values
+#' \code{include_n} whether to include number of non-missing values for each row
+#' \code{include_n_per_col} whether to include the number of individuals in each column
+#' \code{workspace} default workspace passed onto \code{\link[stats]{fisher.test}}
+
 #'
 #' The output is a character matrix which is formatted so as to work well with \code{\link[pander]{pander}}
 #' and \code{\link[knitr]{knit}}.
@@ -37,22 +53,59 @@
 #'
 first_table <- function(data,
                       ...,
-                      column_variable = NULL,
-                      digits = 1,
-                      include_p = TRUE,
-                      p_digits = 3,
-                      small_p_format = c("<", "E", "x10", "html"),
-                      small_p_cutoff = 10 ^ -p_digits,
-                      include_n = FALSE,
-                      include_n_per_col = FALSE,
-                      workspace = 2e5) {
+                      .column_variable = NULL,
+                      .options = first_table_default_options
+                      ) {
   row_details <- quos(...)
-  small_p_format <- match.arg(small_p_format)
 
-  column_variable <- enquo(column_variable)
+  ft_options <- first_table_default_options
+  if (!missing(.options)) {
+    stopifnot(is.list(.options))
+    ft_options[names(.options)] <- .options
+  }
+
+  poss_legacy_options <-
+    which(
+      names(row_details) %in% c(
+        "digits",
+        "include_p",
+        "p_digits",
+        "small_p_format",
+        "small_p_cutoff",
+        "include_n",
+        "include_n_per_col",
+        "workspace"
+      )
+    )
+
+  if (length(poss_legacy_options) > 0L) {
+    warning("Options should now be specified using the .options argument. See ?first_table")
+    legacy_options <- lapply(row_details[poss_legacy_options], get_expr)
+    names(legacy_options) <- names(row_details)[poss_legacy_options]
+    legacy_options <- legacy_options[!vapply(legacy_options, is.null, logical(1))]
+    if (length(legacy_options) > 0L) {
+      ft_options[names(legacy_options)] <- legacy_options
+    }
+    row_details[poss_legacy_options] <- NULL
+  }
+
+  ft_options$small_p_format <- match.arg(ft_options$small_p_format, first_table_default_options$small_p_format)
+
+  if (is.null(ft_options$small_p_cutoff)) {
+    ft_options$small_p_cutoff <- 10 ^ -ft_options$p_digits
+  }
+
+  if ("column_variable" %in% names(row_details)) {
+    warning("Column variable should now be specified using the .column_variable argument. See ?first_table")
+    column_variable <- row_details$column_variable
+    row_details$column_variable <- NULL
+  } else {
+    column_variable <- enquo(.column_variable)
+  }
+
   col_item <- get_column_item(column_variable, data)
   if (is.null(get_expr(column_variable))) {
-    include_p <- FALSE
+    ft_options$include_p <- FALSE
   }
   n_row <- length(row_details)
   n_col <- length(levels(col_item))
@@ -65,6 +118,7 @@ first_table <- function(data,
   for (i in seq_along(row_details)) {
     details_item <- row_details[[i]]
     data_item <- eval_tidy(details_item, data)
+    # Check if the item for this row is a call to a row function or not
     if (is.call(details_item[[2L]]) &&
         is.list(data_item) &&
         all(c("data_item", "data_function") %in% names(data_item))) {
@@ -88,23 +142,11 @@ first_table <- function(data,
       current_col_item <- col_item
       row_names[i] <- row_names[i] %|%
         paste(trimws(deparse(get_expr(details_item), width.cutoff = 500)), collapse = " ")
-      if (inherits(col_item, "Surv")) {
-        data_item <- coxph_row(!!details_item)
-      } else if (is.numeric(data_item)) {
-        if (length(unique(current_col_item)) <= 2) {
-          data_item <- wilcox_row(!!details_item)
-        } else {
-          data_item <- kruskal_row(!!details_item)
-        }
-      } else if (is.logical(data_item)) {
-        data_item <- fisher_row(!!details_item, reference_level = "FALSE", workspace = workspace)
-      } else {
-        data_item <- fisher_row(!!details_item, workspace = workspace)
-      }
+      data_item <- first_table_row(!!details_item, workspace = ft_options$workspace)
     }
-    row_function <- data_item$data_function
+    row_data_function <- data_item$data_function
 
-    output_data <- row_function(row_item, current_col_item, digits, include_p)
+    output_data <- row_data_function(row_item, current_col_item, ft_options$digits, ft_options$include_p)
 
     row_output <- output_data$row_output
     if (!is.array(row_output)) {
@@ -115,14 +157,14 @@ first_table <- function(data,
       mat[1:length(item)] <- item
       mat
     }
-    if (include_n) {
+    if (ft_options$include_n) {
       row_output <- cbind(pad_item(sum(!is.na(row_item))), row_output)
     }
     row_output <- cbind(pad_item(row_names[i]), row_output)
-    if (include_p) {
+    if (ft_options$include_p) {
       row_output <- cbind(
         row_output,
-        pad_item(pretty_p(output_data$p, p_digits, small_p_format, small_p_cutoff))
+        pad_item(pretty_p(output_data$p, ft_options$p_digits, ft_options$small_p_format, ft_options$small_p_cutoff))
       )
     }
     output[[i]] <- row_output
@@ -131,7 +173,7 @@ first_table <- function(data,
   output <- invoke(rbind, output)
 
   col_names <- c("Variable")
-  if (include_n) {
+  if (ft_options$include_n) {
     col_names <- c(col_names, "n")
   }
   col_names <- c(col_names, "Level")
@@ -144,12 +186,12 @@ first_table <- function(data,
   } else {
     col_names <- c(col_names, "Value")
   }
-  if (include_p) {
+  if (ft_options$include_p) {
     col_names <- c(col_names, "p")
   }
   colnames(output) <- col_names
 
-  if (include_n_per_col && n_col >= 1) {
+  if (ft_options$include_n_per_col && n_col >= 1) {
     row_with_n <- matrix("", ncol = ncol(output), nrow = 1)
     colnames(row_with_n) <- col_names
     row_with_n[1, "Variable"] <- "n"

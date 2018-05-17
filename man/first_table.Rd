@@ -4,33 +4,17 @@
 \alias{first_table}
 \title{First Table}
 \usage{
-first_table(data, ..., column_variable = NULL, digits = 1,
-  include_p = TRUE, p_digits = 3, small_p_format = c("<", "E", "x10",
-  "html"), small_p_cutoff = 10^-p_digits, include_n = FALSE,
-  include_n_per_col = FALSE, workspace = 2e+05)
+first_table(data, ..., .column_variable = NULL,
+  .options = first_table_default_options)
 }
 \arguments{
 \item{data}{`data.frame` or `tibble` to use as data source}
 
 \item{...}{row details}
 
+\item{.options}{options to use for formatting (see details)}
+
 \item{column_variable}{variable used for columns (if any)}
-
-\item{digits}{digits used for formatting variables by default}
-
-\item{include_p}{whether to include p values in table}
-
-\item{p_digits}{digits used for formatting p values by default}
-
-\item{small_p_format}{format for small p values}
-
-\item{small_p_cutoff}{cutoff for small p values}
-
-\item{include_n}{whether to include number of non-missing values for each row}
-
-\item{include_n_per_col}{whether to include the number of individuals in each column}
-
-\item{workspace}{default workspace passed onto \code{\link[stats]{fisher.test}}}
 }
 \value{
 character matrix with the requested rows and columns
@@ -46,6 +30,16 @@ functions, or if the defaults are appropriate can just be a bare column name or 
 using a column. These calculations are implemented using \code{\link[rlang]{eval_tidy}} and
 support the \code{\link[rlang]{quasiquotation}} operators such as \code{\link[rlang]{!!}} and
 \code{\link[rlang]{!!!}}.
+
+Options are currently:
+\code{digits} digits used for formatting variables by default
+\code{p_digits} digits used for formatting p values by default
+\code{include_p} whether to include p values in table
+\code{small_p_format} format for small p values
+\code{small_p_cutoff} cutoff for small p values
+\code{include_n} whether to include number of non-missing values for each row
+\code{include_n_per_col} whether to include the number of individuals in each column
+\code{workspace} default workspace passed onto \code{\link[stats]{fisher.test}}
 
 The output is a character matrix which is formatted so as to work well with \code{\link[pander]{pander}}
 and \code{\link[knitr]{knit}}.

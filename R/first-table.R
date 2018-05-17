@@ -47,7 +47,7 @@ first_table_default_options <-
 #'
 #' @examples
 #' first_table(mtcars,
-#'   column_variable = cyl,
+#'   .column_variable = cyl,
 #'   "Miles per gallon" = mpg,
 #'   "Transmission" = factor(am))
 #'

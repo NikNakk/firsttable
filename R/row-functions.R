@@ -60,7 +60,7 @@ med_iqr <- function(row_item, col_item, digits, na.rm) {
 
 # parametric_row --------------------------------------------------------------
 
-#' Row for parameteric data
+#' Row for parametric data
 #'
 #' @param data_item item to be taken from data for row
 #' @param row_digits digits for data item (overrides table as a whole)

@@ -101,7 +101,7 @@ mean_sd <- function(row_item, col_item, digits, na.rm) {
   values <- tapply(
     row_item,
     col_item,
-    function(x) {c(mean(x, na.rm = na.rm), sd(x, na.rm = na.rm))},
+    function(x) {c(mean(x, na.rm = na.rm), stats::sd(x, na.rm = na.rm))},
     simplify = FALSE
   )
   values <- simplify2array(values)

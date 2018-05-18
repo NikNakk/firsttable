@@ -6,7 +6,8 @@
 \usage{
 first_table_options(digits = 1, include_p = TRUE, p_digits = 3,
   small_p_format = c("<", "E", "x10", "html"), small_p_cutoff = NULL,
-  include_n = FALSE, include_n_per_col = FALSE, workspace = 2e+05)
+  include_n = FALSE, include_n_per_col = FALSE, workspace = 2e+05,
+  default_non_parametric = TRUE)
 }
 \arguments{
 \item{digits}{digits used for formatting variables by default}
@@ -24,6 +25,9 @@ first_table_options(digits = 1, include_p = TRUE, p_digits = 3,
 \item{include_n_per_col}{whether to include the number of individuals in each column}
 
 \item{workspace}{default workspace passed onto \code{\link[stats]{fisher.test}}}
+
+\item{default_non_parametric}{whether to default to non parametric tests for
+continuous variables (note only applies to rows without an explicit row function)}
 }
 \description{
 First Table options

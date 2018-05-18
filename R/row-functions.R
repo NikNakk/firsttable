@@ -37,7 +37,6 @@ wilcox_row <- function(data_item,
   )
 }
 
-
 # med_iqr -----------------------------------------------------------------
 
 med_iqr <- function(row_item, col_item, digits, na.rm) {
@@ -56,6 +55,61 @@ med_iqr <- function(row_item, col_item, digits, na.rm) {
     quartiles[2, ],
     quartiles[1, ],
     quartiles[3, ]
+  )
+}
+
+# parametric_row --------------------------------------------------------------
+
+#' Row for parameteric data
+#'
+#' @param data_item item to be taken from data for row
+#' @param row_digits digits for data item (overrides table as a whole)
+#' @param na.rm whether to remove NA before reporting median and quartiles
+#' @param data separate dataset to use
+#' @param data_filter filter to apply to dataset
+#'
+#' @export
+#'
+parametric_row <- function(data_item,
+                           data = NULL,
+                           data_filter = NULL,
+                           row_digits = NULL,
+                           na.rm = TRUE) {
+  list(
+    data_item = enquo(data_item),
+    data = data,
+    data_filter = enquo(data_filter),
+    data_function = function(row_item, col_item, digits, include_p) {
+      digits <- row_digits %||% digits
+      list(row_output = mean_sd(row_item, col_item, digits, na.rm),
+           p = if (include_p) {
+             if (length(unique(col_item[!is.na(row_item)])) == 2L) {
+               stats::t.test(row_item ~ col_item)$p.value
+             } else {
+               NA_real_
+             }
+           } else {
+             NULL
+           })
+    }
+  )
+}
+
+# mean_sd -----------------------------------------------------------------
+
+mean_sd <- function(row_item, col_item, digits, na.rm) {
+  values <- tapply(
+    row_item,
+    col_item,
+    function(x) {c(mean(x, na.rm = na.rm), sd(x, na.rm = na.rm))},
+    simplify = FALSE
+  )
+  values <- simplify2array(values)
+  sprintf(
+    "%2$.*1$f (%3$.*1$f)",
+    digits,
+    values[1, ],
+    values[2, ]
   )
 }
 
@@ -266,6 +320,7 @@ pretty_p <- function(p,
 #' @param reference_level a level of the variable to drop from display (only
 #'   relevant for logical/factor/character variables)
 #' @param workspace passed onto \code{\link[stats]{fisher.test}}
+#' @param non_parametric whether to use non-parametric tests
 
 #' @return row for inclusion in `first_table`
 #'
@@ -285,7 +340,8 @@ first_table_row <- function(data_item,
                            na.rm = TRUE,
                            reference_level = NULL,
                            include_reference = NULL,
-                           workspace = 2e5) {
+                           workspace = 2e5,
+                           non_parametric = TRUE) {
   data_item <- enquo(data_item)
   data_filter <- enquo(data_filter)
   list(
@@ -299,12 +355,17 @@ first_table_row <- function(data_item,
                                   row_digits = row_digits,
                                   include_reference = if (is.null(include_reference)) TRUE else include_reference)
       } else if (is.numeric(row_item)) {
-        if (length(unique(col_item)) <= 2) {
-          row_function <- wilcox_row(!!data_item, data = data, data_filter = !!data_filter,
-                                     row_digits = row_digits, na.rm = na.rm)
+        if (non_parametric) {
+          if (length(unique(col_item)) <= 2) {
+            row_function <- wilcox_row(!!data_item, data = data, data_filter = !!data_filter,
+                                       row_digits = row_digits, na.rm = na.rm)
+          } else {
+            row_function <- kruskal_row(!!data_item, data = data, data_filter = !!data_filter,
+                                        row_digits = row_digits, na.rm = na.rm)
+          }
         } else {
-          row_function <- kruskal_row(!!data_item, data = data, data_filter = !!data_filter,
-                                      row_digits = row_digits, na.rm = na.rm)
+          row_function <- parametric_row(!!data_item, data = data, data_filter = !!data_filter,
+                                         row_digits = row_digits, na.rm = na.rm)
         }
       } else if (is.logical(row_item)) {
         row_function <- fisher_row(!!data_item, data = data, data_filter = !!data_filter, row_digits = row_digits,

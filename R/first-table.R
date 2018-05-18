@@ -8,6 +8,8 @@
 #' @param include_n whether to include number of non-missing values for each row
 #' @param include_n_per_col whether to include the number of individuals in each column
 #' @param workspace default workspace passed onto \code{\link[stats]{fisher.test}}
+#' @param default_non_parametric whether to default to non parametric tests for
+#'   continuous variables (note only applies to rows without an explicit row function)
 
 #' @export
 first_table_options <- function(
@@ -18,7 +20,8 @@ first_table_options <- function(
   small_p_cutoff = NULL,
   include_n = FALSE,
   include_n_per_col = FALSE,
-  workspace = 2e5
+  workspace = 2e5,
+  default_non_parametric = TRUE
 ) {
   list(
     digits = digits,
@@ -28,7 +31,8 @@ first_table_options <- function(
     small_p_cutoff = small_p_cutoff,
     include_n = include_n,
     include_n_per_col = include_n_per_col,
-    workspace = workspace
+    workspace = workspace,
+    default_non_parametric = default_non_parametric
   )
 }
 
@@ -175,7 +179,8 @@ first_table <- function(.data,
       current_col_item <- col_item
       row_names[i] <- row_names[i] %|%
         paste(trimws(deparse(get_expr(details_item), width.cutoff = 500)), collapse = " ")
-      data_item <- first_table_row(!!details_item, workspace = ft_options$workspace)
+      data_item <- first_table_row(!!details_item, workspace = ft_options$workspace,
+                                   non_parametric = ft_options$default_non_parametric)
     }
     row_data_function <- data_item$data_function
 

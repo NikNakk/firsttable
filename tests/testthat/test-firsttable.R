@@ -155,12 +155,28 @@ test_that(
       first_table(
         mtcars,
         .column_variable = cyl,
-        .options = list(include_p = FALSE),
+        .options = first_table_options(include_p = FALSE),
         mpg
       ),
       structure(c("mpg", "", "26.0 (22.8 - 30.4)", "19.7 (18.6 - 21.0)",
                   "15.2 (14.4 - 16.2)"), .Dim = c(1L, 5L), .Dimnames = list(NULL,
                   c("Variable", "Level", "4", "6", "8")))
     )
-  })
+})
 
+test_that(
+  "Test of parametric_row",
+  {
+    expect_equal(
+      first_table(
+        mtcars,
+        .column_variable = am,
+        .options = first_table_options(default_non_parametric = FALSE),
+        mpg
+      ),
+      structure(c("mpg", "", "17.1 (3.8)", "24.4 (6.2)", "0.001"),
+                .Dim = c(1L, 5L),
+                .Dimnames = list(NULL, c("Variable", "Level", "0", "1", "p")))
+    )
+  }
+)

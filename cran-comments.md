@@ -4,7 +4,7 @@
 * win-builder (R-release and R-devel)
 
 ## R CMD check results
-There were no ERRORs, WARNINGs or NOTEs.
+There were no ERRORs, WARNINGs or NOTEs (other than it being a new submission).
 
 ## Downstream dependencies
 None at this time

@@ -19,13 +19,13 @@ first_table_row(data_item, data = NULL, data_filter = NULL,
 
 \item{na.rm}{whether to remove NA before reporting median and quartiles}
 
+\item{reference_level}{a level of the variable to drop from display (only
+relevant for logical/factor/character variables)}
+
 \item{include_reference}{whether to include a row for the reference level of
-a factor}
+a factor (only relevant for logical/factor/character variables)}
 
 \item{workspace}{passed onto \code{\link[stats]{fisher.test}}}
-
-\item{include_reference}{whether to include the first level of the factor
-in the report}
 }
 \description{
 Row with type selected by firsttable

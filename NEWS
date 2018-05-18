@@ -1,0 +1,11 @@
+firsttable 0.1.0 (2018-05-18)
+-----------------------------
+
+* First version of package being readied for wider release
+* Changes syntax for options to use a named list supplied as `.options` to
+  reduce the risk of clashes between future options and row details. This
+  also makes it easier to call the function multiple times with the same
+  options. At present the old syntax is still supported (with a warning) but
+  this may be removed in future.
+* Also changes the names of the `data` and `column_variable` options to have a
+  leading `.` for similar reasons.

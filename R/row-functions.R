@@ -179,7 +179,11 @@ coxph_row <- function(data_item,
       model <- survival::coxph(col_item ~ row_item)
       hrs <- exp(stats::coef(model))
       cis <- exp(stats::confint(model))
-      ps <- pchisq((summary(model)$coefficients[, "z", drop = TRUE]) ^ 2, 1, lower.tail = FALSE)
+      ps <- stats::pchisq(
+        (summary(model)$coefficients[, "z", drop = TRUE]) ^ 2,
+        df = 1,
+        lower.tail = FALSE
+      )
       if (names(hrs)[1L] == "row_item") {
         levs <- ""
         cis <- matrix(cis, ncol = 2)
@@ -258,9 +262,9 @@ pretty_p <- function(p,
 
 #' @inheritParams wilcox_row
 #' @param include_reference whether to include a row for the reference level of
-#'   a factor
-#' @param include_reference whether to include the first level of the factor
-#'        in the report
+#'   a factor (only relevant for logical/factor/character variables)
+#' @param reference_level a level of the variable to drop from display (only
+#'   relevant for logical/factor/character variables)
 #' @param workspace passed onto \code{\link[stats]{fisher.test}}
 
 #' @import rlang

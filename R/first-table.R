@@ -14,8 +14,8 @@ first_table_default_options <-
 
 #' First Table
 #'
-#' @param data `data.frame` or `tibble` to use as data source
-#' @param column_variable variable used for columns (if any)
+#' @param .data `data.frame` or `tibble` to use as data source
+#' @param .column_variable variable used for columns (if any)
 #' @param .options options to use for formatting (see details)
 #' @param ... row details
 #' @return character matrix with the requested rows and columns
@@ -51,7 +51,7 @@ first_table_default_options <-
 #'   "Miles per gallon" = mpg,
 #'   "Transmission" = factor(am))
 #'
-first_table <- function(data,
+first_table <- function(.data,
                       ...,
                       .column_variable = NULL,
                       .options = first_table_default_options
@@ -103,7 +103,7 @@ first_table <- function(data,
     column_variable <- enquo(.column_variable)
   }
 
-  col_item <- get_column_item(column_variable, data)
+  col_item <- get_column_item(column_variable, .data)
   if (is.null(get_expr(column_variable))) {
     ft_options$include_p <- FALSE
   }
@@ -117,7 +117,7 @@ first_table <- function(data,
 
   for (i in seq_along(row_details)) {
     details_item <- row_details[[i]]
-    data_item <- eval_tidy(details_item, data)
+    data_item <- eval_tidy(details_item, .data)
     # Check if the item for this row is a call to a row function or not
     if (is.call(details_item[[2L]]) &&
         is.list(data_item) &&
@@ -126,7 +126,7 @@ first_table <- function(data,
           paste(trimws(deparse(get_expr(details_item)[[2L]], width.cutoff = 500)), collapse = " ")
         if (!is.null(data_item$data) ||
             !is.null(get_expr(data_item$data_filter))) {
-          row_data <- data_item$data %||% data
+          row_data <- data_item$data %||% .data
           if (!is.null(get_expr(data_item$data_filter))) {
             stopifnot(requireNamespace("dplyr"))
             row_data <- dplyr::filter(row_data, !!data_item$data_filter)
@@ -134,7 +134,7 @@ first_table <- function(data,
           row_item <- eval_tidy(data_item$data_item, row_data)
           current_col_item <- get_column_item(column_variable, row_data)
         } else {
-          row_item <- eval_tidy(data_item$data_item, data)
+          row_item <- eval_tidy(data_item$data_item, .data)
           current_col_item <- col_item
         }
     } else {
@@ -202,15 +202,15 @@ first_table <- function(data,
   output
 }
 
-get_column_item <- function(column_variable, data) {
-  if (!is.null(get_expr(column_variable))) {
-    col_item <- eval_tidy(column_variable, data)
+get_column_item <- function(.column_variable, .data) {
+  if (!is.null(get_expr(.column_variable))) {
+    col_item <- eval_tidy(.column_variable, .data)
     if (inherits(col_item, "Surv")) {
       col_item
     } else {
       as.factor(col_item)
     }
   } else {
-    col_item <- factor(rep(1, nrow(data)))
+    col_item <- factor(rep(1, nrow(.data)))
   }
 }

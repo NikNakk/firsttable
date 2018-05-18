@@ -4,17 +4,17 @@
 \alias{first_table}
 \title{First Table}
 \usage{
-first_table(data, ..., .column_variable = NULL,
+first_table(.data, ..., .column_variable = NULL,
   .options = first_table_default_options)
 }
 \arguments{
-\item{data}{`data.frame` or `tibble` to use as data source}
+\item{.data}{`data.frame` or `tibble` to use as data source}
 
 \item{...}{row details}
 
-\item{.options}{options to use for formatting (see details)}
+\item{.column_variable}{variable used for columns (if any)}
 
-\item{column_variable}{variable used for columns (if any)}
+\item{.options}{options to use for formatting (see details)}
 }
 \value{
 character matrix with the requested rows and columns

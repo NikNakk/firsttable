@@ -178,5 +178,14 @@ test_that(
                 .Dim = c(1L, 5L),
                 .Dimnames = list(NULL, c("Variable", "Level", "0", "1", "p")))
     )
+    expect_equal(
+      first_table(
+        mtcars,
+        .options = first_table_options(include_p = FALSE),
+        parametric_row(mpg)
+      ),
+      structure(c("mpg", "", "20.1 (6.0)"), .Dim = c(1L, 3L), .Dimnames = list(
+        NULL, c("Variable", "Level", "Value")))
+    )
   }
 )

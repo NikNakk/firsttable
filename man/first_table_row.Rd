@@ -27,6 +27,16 @@ a factor (only relevant for logical/factor/character variables)}
 
 \item{workspace}{passed onto \code{\link[stats]{fisher.test}}}
 }
+\value{
+row for inclusion in `first_table`
+}
 \description{
 Row with type selected by firsttable
+}
+\details{
+This provides a generic row for \code{\link{first_table}} with
+the type of row determined from the \code{class} of the data. This allows a
+\code{list} of \code{\link[rlang]{quos}} to be created and then used for
+both a standard \code{\link{first_table}} and one that uses a
+\code{\link[survival]{Surv}} column.
 }

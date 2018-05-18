@@ -51,6 +51,18 @@ first_table_default_options <-
 #'   "Miles per gallon" = mpg,
 #'   "Transmission" = factor(am))
 #'
+#' # Example demonstrating use of quasiquotation from rlang
+#' library(rlang)
+#' my_rows <- quos(
+#'   kruskal_row(Sepal.Length, row_digits = 0),
+#'   "Sepal width" = first_table_row(Sepal.Width, row_digits = 2),
+#'   "Wide petals" = Petal.Width > median(Petal.Width)
+#' )
+#' first_table(iris,
+#'   .column_variable = Species,
+#'   !!!my_rows
+#' )
+#'
 first_table <- function(.data,
                       ...,
                       .column_variable = NULL,

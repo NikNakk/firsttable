@@ -24,3 +24,4 @@ using `rlang::eval_tidy` and support the quasiquotation operators such as `!!` a
 
 [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/NikNakk/firsttable?branch=master&svg=true)](https://ci.appveyor.com/project/NikNakk/firsttable)
 [![Build Status](https://travis-ci.org/NikNakk/firsttable.svg?branch=master)](https://travis-ci.org/NikNakk/firsttable)
+[![Code Coverage](https://codecov.io/gh/NikNakk/firsttable/branch/master/graph/badge.svg)](https://codecov.io/github/NikNakk/firsttable?branch=master)

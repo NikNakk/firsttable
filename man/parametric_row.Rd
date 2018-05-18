@@ -2,7 +2,7 @@
 % Please edit documentation in R/row-functions.R
 \name{parametric_row}
 \alias{parametric_row}
-\title{Row for parameteric data}
+\title{Row for parametric data}
 \usage{
 parametric_row(data_item, data = NULL, data_filter = NULL,
   row_digits = NULL, na.rm = TRUE)
@@ -19,5 +19,5 @@ parametric_row(data_item, data = NULL, data_filter = NULL,
 \item{na.rm}{whether to remove NA before reporting median and quartiles}
 }
 \description{
-Row for parameteric data
+Row for parametric data
 }

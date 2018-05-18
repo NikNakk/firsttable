@@ -1,16 +1,36 @@
-#' First Table default options
+#' First Table options
+#'
+#' @param digits digits used for formatting variables by default
+#' @param include_p digits used for formatting p values by default
+#' @param p_digits whether to include p values in table
+#' @param small_p_format format for small p values
+#' @param small_p_cutoff cutoff for small p values
+#' @param include_n whether to include number of non-missing values for each row
+#' @param include_n_per_col whether to include the number of individuals in each column
+#' @param workspace default workspace passed onto \code{\link[stats]{fisher.test}}
+
 #' @export
-first_table_default_options <-
+first_table_options <- function(
+  digits = 1,
+  include_p = TRUE,
+  p_digits = 3,
+  small_p_format = c("<", "E", "x10", "html"),
+  small_p_cutoff = NULL,
+  include_n = FALSE,
+  include_n_per_col = FALSE,
+  workspace = 2e5
+) {
   list(
-    digits = 1,
-    include_p = TRUE,
-    p_digits = 3,
-    small_p_format = c("<", "E", "x10", "html"),
-    small_p_cutoff = NULL,
-    include_n = FALSE,
-    include_n_per_col = FALSE,
-    workspace = 2e5
+    digits = digits,
+    include_p = include_p,
+    p_digits = p_digits,
+    small_p_format = small_p_format,
+    small_p_cutoff = small_p_cutoff,
+    include_n = include_n,
+    include_n_per_col = include_n_per_col,
+    workspace = workspace
   )
+}
 
 #' First Table
 #'
@@ -28,15 +48,7 @@ first_table_default_options <-
 #' support the \code{\link[rlang]{quasiquotation}} operators such as \code{\link[rlang]{!!}} and
 #' \code{\link[rlang]{!!!}}.
 #'
-#' Options are currently:
-#' \code{digits} digits used for formatting variables by default
-#' \code{p_digits} digits used for formatting p values by default
-#' \code{include_p} whether to include p values in table
-#' \code{small_p_format} format for small p values
-#' \code{small_p_cutoff} cutoff for small p values
-#' \code{include_n} whether to include number of non-missing values for each row
-#' \code{include_n_per_col} whether to include the number of individuals in each column
-#' \code{workspace} default workspace passed onto \code{\link[stats]{fisher.test}}
+#' Options can be specified as a list or by using \code{\link{first_table_options}}.
 
 #'
 #' The output is a character matrix which is formatted so as to work well with \code{\link[pander]{pander}}
@@ -75,11 +87,11 @@ first_table_default_options <-
 first_table <- function(.data,
                       ...,
                       .column_variable = NULL,
-                      .options = first_table_default_options
+                      .options = first_table_options()
                       ) {
   row_details <- quos(...)
 
-  ft_options <- first_table_default_options
+  ft_options <- first_table_options()
   if (!missing(.options)) {
     stopifnot(is.list(.options))
     ft_options[names(.options)] <- .options
@@ -110,7 +122,7 @@ first_table <- function(.data,
     row_details[poss_legacy_options] <- NULL
   }
 
-  ft_options$small_p_format <- match.arg(ft_options$small_p_format, first_table_default_options$small_p_format)
+  ft_options$small_p_format <- match.arg(ft_options$small_p_format, first_table_options()$small_p_format)
 
   if (is.null(ft_options$small_p_cutoff)) {
     ft_options$small_p_cutoff <- 10 ^ -ft_options$p_digits

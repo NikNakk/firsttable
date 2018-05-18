@@ -69,11 +69,14 @@ test_that(
         .Dimnames = list(NULL, c("Variable", "n", "Level", "6", "8", "p"))
       )
     )
-
+  })
+test_that(
+  "Survival columns work",
+  {
     expect_equal(
       first_table(lung,
                   .column_variable = Surv(time, status),
-                  .options = list(include_n = TRUE, include_n_per_col = TRUE),
+                  .options = list(include_n = TRUE),
                   ECOG = factor(ph.ecog),
                   `Meal calories` = first_table_row(meal.cal, row_digits = 2)
                   ),
@@ -113,3 +116,40 @@ test_that(
       )
     )
   })
+test_that(
+  "Warnings for deprecated options",
+  {
+    expect_warning(
+      first_table(mtcars,
+                  column_variable = cyl,
+                  mpg
+      ),
+      regexp = "Column variable should now be specified"
+    )
+    expect_warning(
+      first_table(mtcars,
+                  include_n = TRUE,
+                  mpg
+      ),
+      regexp = "Options should now be specified"
+    )
+  })
+test_that(
+  "Tests of kruskal_row and other options",
+  {
+    expect_equal(
+      first_table(
+        mtcars,
+        .column_variable = cyl,
+        .options = list(include_n_per_col = TRUE),
+        fisher_row(factor(am), include_reference = FALSE, reference_level = NULL),
+        mpg
+        ),
+      structure(c("n", "factor(am)", "mpg", "", "1", "", "11", "8 (72.7%)",
+                  "26.0 (22.8 - 30.4)", "7", "3 (42.9%)", "19.7 (18.6 - 21.0)",
+                  "14", "2 (14.3%)", "15.2 (14.4 - 16.2)", "", "0.009", "<0.001"
+      ), .Dim = c(3L, 6L), .Dimnames = list(NULL, c("Variable", "Level",
+                                                    "4", "6", "8", "p")))
+    )
+  })
+

@@ -5,7 +5,7 @@
 \title{First Table}
 \usage{
 first_table(.data, ..., .column_variable = NULL,
-  .options = first_table_default_options)
+  .options = first_table_options())
 }
 \arguments{
 \item{.data}{`data.frame` or `tibble` to use as data source}
@@ -31,15 +31,7 @@ using a column. These calculations are implemented using \code{\link[rlang]{eval
 support the \code{\link[rlang]{quasiquotation}} operators such as \code{\link[rlang]{!!}} and
 \code{\link[rlang]{!!!}}.
 
-Options are currently:
-\code{digits} digits used for formatting variables by default
-\code{p_digits} digits used for formatting p values by default
-\code{include_p} whether to include p values in table
-\code{small_p_format} format for small p values
-\code{small_p_cutoff} cutoff for small p values
-\code{include_n} whether to include number of non-missing values for each row
-\code{include_n_per_col} whether to include the number of individuals in each column
-\code{workspace} default workspace passed onto \code{\link[stats]{fisher.test}}
+Options can be specified as a list or by using \code{\link{first_table_options}}.
 
 The output is a character matrix which is formatted so as to work well with \code{\link[pander]{pander}}
 and \code{\link[knitr]{knit}}.
@@ -62,4 +54,12 @@ first_table(iris,
   !!!my_rows
 )
 
+# Example demonstrating use of survival column variable
+library(survival)
+first_table(lung,
+  .column_variable = Surv(time, status),
+  .options = list(include_n = TRUE, include_n_per_col = TRUE),
+   ECOG = factor(ph.ecog),
+   `Meal calories` = first_table_row(meal.cal, row_digits = 2)
+)
 }

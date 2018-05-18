@@ -243,7 +243,7 @@ pretty_p <- function(p,
     }
   } else if (small_p_format == "html") {
     small_p_func <- function(p, small_p_cutoff) {
-      sub("E(-?)\\+?0?(\\d+)", "\u00D710<sup>\\1\\2</sup>", sprintf("%.1E", p))
+      sub("E(-?)\\+?0?(\\d+)", "&times;<sup>\\1\\2</sup>", sprintf("%.1E", p))
     }
   }
 

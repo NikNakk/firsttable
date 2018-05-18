@@ -141,7 +141,11 @@ fisher_row <- function(data_item,
       list(
         row_output = output,
         p = if (include_p) {
-          stats::fisher.test(tab, workspace = workspace)$p.value
+          if (all(dim(tab)) > 1L) {
+            stats::fisher.test(tab, workspace = workspace)$p.value
+          } else {
+            NA_real_
+          }
         } else {
           NULL
         }

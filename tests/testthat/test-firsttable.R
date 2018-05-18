@@ -69,4 +69,47 @@ test_that(
         .Dimnames = list(NULL, c("Variable", "n", "Level", "6", "8", "p"))
       )
     )
+
+    expect_equal(
+      first_table(lung,
+                  .column_variable = Surv(time, status),
+                  .options = list(include_n = TRUE, include_n_per_col = TRUE),
+                  ECOG = factor(ph.ecog),
+                  `Meal calories` = first_table_row(meal.cal, row_digits = 2)
+                  ),
+      structure(
+        c(
+          "ECOG",
+          "",
+          "",
+          "",
+          "Meal calories",
+          "227",
+          "",
+          "",
+          "",
+          "181",
+          "0",
+          "1",
+          "2",
+          "3",
+          "",
+          "Reference",
+          "1.4 (1.0 - 2.1)",
+          "2.5 (1.6 - 3.9)",
+          "9.1 (1.2 - 67.9)",
+          "1.00 (1.00 - 1.00)",
+          "",
+          "0.063",
+          "<0.001",
+          "0.031",
+          "0.593"
+        ),
+        .Dim = c(5L, 5L),
+        .Dimnames = list(NULL, c(
+          "Variable", "n", "Level", "Hazard ratio (95% CI)",
+          "p"
+        ))
+      )
+    )
   })

@@ -63,6 +63,15 @@ first_table_default_options <-
 #'   !!!my_rows
 #' )
 #'
+#' # Example demonstrating use of survival column variable
+#' library(survival)
+#' first_table(lung,
+#'   .column_variable = Surv(time, status),
+#'   .options = list(include_n = TRUE, include_n_per_col = TRUE),
+#'    ECOG = factor(ph.ecog),
+#'    `Meal calories` = first_table_row(meal.cal, row_digits = 2)
+#' )
+
 first_table <- function(.data,
                       ...,
                       .column_variable = NULL,

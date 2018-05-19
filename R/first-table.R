@@ -184,7 +184,7 @@ first_table <- function(.data,
     }
     row_data_function <- data_item$data_function
 
-    output_data <- row_data_function(row_item, current_col_item, ft_options$digits, ft_options$include_p)
+    output_data <- row_data_function(row_item, current_col_item, ft_options)
 
     row_output <- output_data$row_output
     if (!is.array(row_output)) {

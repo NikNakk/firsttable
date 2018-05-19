@@ -9,7 +9,7 @@
 #' @param include_n_per_col whether to include the number of individuals in each column
 #' @param workspace default workspace passed onto \code{\link[stats]{fisher.test}}
 #' @param default_non_parametric whether to default to non parametric tests for
-#'   continuous variables (note only applies to rows without an explicit row function)
+#'   continuous variables
 
 #' @export
 first_table_options <- function(
@@ -184,7 +184,7 @@ first_table <- function(.data,
     }
     row_data_function <- data_item$data_function
 
-    output_data <- row_data_function(row_item, current_col_item, ft_options$digits, ft_options$include_p)
+    output_data <- row_data_function(row_item, current_col_item, ft_options)
 
     row_output <- output_data$row_output
     if (!is.array(row_output)) {
@@ -196,7 +196,7 @@ first_table <- function(.data,
       mat
     }
     if (ft_options$include_n) {
-      row_output <- cbind(pad_item(sum(!is.na(row_item))), row_output)
+      row_output <- cbind(pad_item(sum(!is.na(row_item) & !is.na(current_col_item))), row_output)
     }
     row_output <- cbind(pad_item(row_names[i]), row_output)
     if (ft_options$include_p) {

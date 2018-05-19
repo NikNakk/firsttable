@@ -6,7 +6,7 @@
 \usage{
 first_table_row(data_item, data = NULL, data_filter = NULL,
   row_digits = NULL, na.rm = TRUE, reference_level = NULL,
-  include_reference = NULL, workspace = 2e+05, non_parametric = TRUE)
+  include_reference = NULL, workspace = NULL, non_parametric = NULL)
 }
 \arguments{
 \item{data_item}{item to be taken from data for row}

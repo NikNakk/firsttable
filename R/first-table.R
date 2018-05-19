@@ -196,7 +196,7 @@ first_table <- function(.data,
       mat
     }
     if (ft_options$include_n) {
-      row_output <- cbind(pad_item(sum(!is.na(row_item))), row_output)
+      row_output <- cbind(pad_item(sum(!is.na(row_item) & !is.na(current_col_item))), row_output)
     }
     row_output <- cbind(pad_item(row_names[i]), row_output)
     if (ft_options$include_p) {

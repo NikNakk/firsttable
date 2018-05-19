@@ -27,7 +27,7 @@ first_table_options(digits = 1, include_p = TRUE, p_digits = 3,
 \item{workspace}{default workspace passed onto \code{\link[stats]{fisher.test}}}
 
 \item{default_non_parametric}{whether to default to non parametric tests for
-continuous variables (note only applies to rows without an explicit row function)}
+continuous variables}
 }
 \description{
 First Table options

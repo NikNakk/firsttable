@@ -9,7 +9,7 @@
 #' @param include_n_per_col whether to include the number of individuals in each column
 #' @param workspace default workspace passed onto \code{\link[stats]{fisher.test}}
 #' @param default_non_parametric whether to default to non parametric tests for
-#'   continuous variables (note only applies to rows without an explicit row function)
+#'   continuous variables
 
 #' @export
 first_table_options <- function(

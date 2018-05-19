@@ -1,3 +1,10 @@
+firsttable 0.1.1 (2018-05-19)
+-----------------------------
+
+* include_row_n now correct where there is missing column data
+* All first_table options now passed to row functions to allow for better
+  use of options where not explicitly overridden for a row.
+
 firsttable 0.1.0 (2018-05-18)
 -----------------------------
 

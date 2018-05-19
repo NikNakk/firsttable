@@ -21,10 +21,10 @@ wilcox_row <- function(data_item,
     data_item = enquo(data_item),
     data = data,
     data_filter = enquo(data_filter),
-    data_function = function(row_item, col_item, digits, include_p) {
-      digits <- row_digits %||% digits
+    data_function = function(row_item, col_item, ft_options) {
+      digits <- row_digits %||% ft_options$digits
       list(row_output = med_iqr(row_item, col_item, digits, na.rm),
-           p = if (include_p) {
+           p = if (ft_options$include_p) {
              if (length(unique(col_item[!is.na(row_item)])) == 2L) {
                stats::wilcox.test(row_item ~ col_item)$p.value
              } else {
@@ -79,10 +79,10 @@ parametric_row <- function(data_item,
     data_item = enquo(data_item),
     data = data,
     data_filter = enquo(data_filter),
-    data_function = function(row_item, col_item, digits, include_p) {
-      digits <- row_digits %||% digits
+    data_function = function(row_item, col_item, ft_options) {
+      digits <- row_digits %||% ft_options$digits
       list(row_output = mean_sd(row_item, col_item, digits, na.rm),
-           p = if (include_p) {
+           p = if (ft_options$include_p) {
              if (length(unique(col_item[!is.na(row_item)])) == 2L) {
                stats::t.test(row_item ~ col_item)$p.value
              } else {
@@ -134,11 +134,11 @@ kruskal_row <- function(data_item,
     data_item = enquo(data_item),
     data = data,
     data_filter = enquo(data_filter),
-    data_function = function(row_item, col_item, digits, include_p) {
-      digits <- row_digits %||% digits
+    data_function = function(row_item, col_item, ft_options) {
+      digits <- row_digits %||% ft_options$digits
       list(
         row_output = med_iqr(row_item, col_item, digits, na.rm),
-        p = if (include_p) {
+        p = if (ft_options$include_p) {
           stats::kruskal.test(row_item ~ col_item)$p.value
         } else {
           NULL
@@ -174,8 +174,8 @@ fisher_row <- function(data_item,
     data_item = enquo(data_item),
     data = data,
     data_filter = enquo(data_filter),
-    data_function = function(row_item, col_item, digits, include_p) {
-      digits <- row_digits %||% digits
+    data_function = function(row_item, col_item, ft_options) {
+      digits <- row_digits %||% ft_options$digits
       tab <- table(row_item, col_item)
       totals <- colSums(tab, na.rm = na.rm)
       output <- sprintf(
@@ -194,7 +194,7 @@ fisher_row <- function(data_item,
       }
       list(
         row_output = output,
-        p = if (include_p) {
+        p = if (ft_options$include_p) {
           if (all(dim(tab) > 1L)) {
             stats::fisher.test(tab, workspace = workspace)$p.value
           } else {
@@ -228,8 +228,8 @@ coxph_row <- function(data_item,
     data_item = enquo(data_item),
     data = data,
     data_filter = enquo(data_filter),
-    data_function = function(row_item, col_item, digits, include_p) {
-      digits <- row_digits %||% digits
+    data_function = function(row_item, col_item, ft_options) {
+      digits <- row_digits %||% ft_options$digits
       model <- survival::coxph(col_item ~ row_item)
       hrs <- exp(stats::coef(model))
       cis <- exp(stats::confint(model))
@@ -257,7 +257,7 @@ coxph_row <- function(data_item,
         ps <- c(NA, ps)
       }
       list(row_output = cbind(levs, output),
-           p = ps)
+           p = if (ft_options$include_p) ps else NULL
     }
   )
 
@@ -348,8 +348,8 @@ first_table_row <- function(data_item,
     data_item = data_item,
     data = data,
     data_filter = data_filter,
-    data_function = function(row_item, col_item, digits, include_p) {
-      digits <- row_digits %||% digits
+    data_function = function(row_item, col_item, ft_options) {
+      digits <- row_digits %||% ft_options$digits
       if (inherits(col_item, "Surv")) {
         row_function <- coxph_row(!!data_item, data = data, data_filter = !!data_filter,
                                   row_digits = row_digits,
@@ -378,7 +378,7 @@ first_table_row <- function(data_item,
                                    include_reference = if (is.null(include_reference)) TRUE else include_reference,
                                    workspace = workspace)
       }
-      row_function$data_function(row_item, col_item, digits, include_p)
+      row_function$data_function(row_item, col_item, ft_options)
     }
   )
 }

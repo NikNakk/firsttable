@@ -21,3 +21,10 @@ wilcox_row(data_item, data = NULL, data_filter = NULL, row_digits = NULL,
 \description{
 Wilcox test row
 }
+\examples{
+first_table(
+  mtcars,
+  .column_variable = am,
+  wilcox_row(disp, row_digits = 2)
+)
+}

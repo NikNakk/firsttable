@@ -21,3 +21,10 @@ kruskal_row(data_item, data = NULL, data_filter = NULL, row_digits = NULL,
 \description{
 Kruskal Wallis test row
 }
+\examples{
+first_table(
+  mtcars,
+  .column_variable = cyl,
+  kruskal_row(disp, row_digits = 2)
+)
+}

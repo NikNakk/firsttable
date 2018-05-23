@@ -25,3 +25,11 @@ row for inclusion in `first_table`
 \description{
 Cox Proportional Hazards Row
 }
+\examples{
+library(survival)
+first_table(lung,
+  .column_variable = Surv(time, status),
+   ECOG = coxph_row(factor(ph.ecog), row_digits = 2)
+ )
+
+}

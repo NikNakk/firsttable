@@ -29,3 +29,10 @@ in the report}
 \description{
 Row using Fisher's exact test
 }
+\examples{
+first_table(
+  mtcars,
+  .column_variable = cyl,
+  fisher_row(gear, row_digits = 2, include_reference = TRUE)
+)
+}

@@ -1,7 +1,5 @@
 ## Notes
-Sorry for resubmitting in a short timespace - I realised there was an error
-in the reporting of the row_n, and some inconsistency in the way table-wide
-options applied to rows where they were not overridden.
+Added more examples as requested
 
 ## Test environments
 * local Windows 7 install, R 3.5.0

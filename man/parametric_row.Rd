@@ -21,3 +21,10 @@ parametric_row(data_item, data = NULL, data_filter = NULL,
 \description{
 Row for parametric data
 }
+\examples{
+first_table(
+  mtcars,
+  .column_variable = am,
+  parametric_row(disp, row_digits = 2)
+)
+}

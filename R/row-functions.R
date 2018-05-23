@@ -12,6 +12,12 @@
 #'
 #' @export
 #'
+#' @examples
+#' first_table(
+#'   mtcars,
+#'   .column_variable = am,
+#'   wilcox_row(disp, row_digits = 2)
+#' )
 wilcox_row <- function(data_item,
                        data = NULL,
                        data_filter = NULL,
@@ -69,7 +75,13 @@ med_iqr <- function(row_item, col_item, digits, na.rm) {
 #' @param data_filter filter to apply to dataset
 #'
 #' @export
-#'
+#' @examples
+#' first_table(
+#'   mtcars,
+#'   .column_variable = am,
+#'   parametric_row(disp, row_digits = 2)
+#' )
+
 parametric_row <- function(data_item,
                            data = NULL,
                            data_filter = NULL,
@@ -124,7 +136,12 @@ mean_sd <- function(row_item, col_item, digits, na.rm) {
 #' @param data_filter filter to apply to dataset
 #'
 #' @export
-#'
+#' @examples
+#' first_table(
+#'   mtcars,
+#'   .column_variable = cyl,
+#'   kruskal_row(disp, row_digits = 2)
+#' )
 kruskal_row <- function(data_item,
                        data = NULL,
                        data_filter = NULL,
@@ -162,6 +179,13 @@ kruskal_row <- function(data_item,
 #'
 #' @export
 #'
+#' @examples
+#' first_table(
+#'   mtcars,
+#'   .column_variable = cyl,
+#'   fisher_row(gear, row_digits = 2, include_reference = TRUE)
+#' )
+
 fisher_row <- function(data_item,
                        data = NULL,
                        data_filter = NULL,
@@ -219,6 +243,14 @@ fisher_row <- function(data_item,
 #' @return row for inclusion in `first_table`
 #' @export
 #'
+#' @examples
+#' library(survival)
+#' first_table(lung,
+#'   .column_variable = Surv(time, status),
+#'    ECOG = coxph_row(factor(ph.ecog), row_digits = 2)
+#'  )
+
+#'
 coxph_row <- function(data_item,
                       data = NULL,
                       data_filter = NULL,
@@ -265,55 +297,6 @@ coxph_row <- function(data_item,
 
 }
 
-#' Format p values for display
-#'
-#' @param p p value to format
-#' @param p_digits number of digits to display
-#' @param small_p_format format used to display p values below a threshold
-#' @param small_p_cutoff cutoff for displaying alternative formatting
-#'
-#' @return formatted p value
-#' @export
-#'
-pretty_p <- function(p,
-                     p_digits,
-                     small_p_format = c("<", "E", "x10", "plotmath", "html"),
-                     small_p_cutoff = 10^-p_digits
-                     ) {
-  small_p_format <- match.arg(small_p_format)
-  if (small_p_format == "<") {
-    small_p_func <- function(p, small_p_cutoff) {
-      sprintf("<%.*f", p_digits, small_p_cutoff)
-    }
-  } else if (small_p_format == "E") {
-    small_p_func <- function(p, small_p_cutoff) {
-      sprintf("%.1E", p)
-    }
-  } else if (small_p_format == "x10") {
-    small_p_func <- function(p, small_p_cutoff) {
-      sub("E(-?)\\+?0?(\\d+)", "x10^\\1\\2", sprintf("%.1E", p))
-    }
-  } else if (small_p_format == "plotmath") {
-    small_p_func <- function(p, small_p_cutoff) {
-      sub("E(-?)\\+?0?(\\d+)", " %*% 10^\\1\\2", sprintf("%.1E", p))
-    }
-  } else if (small_p_format == "html") {
-    small_p_func <- function(p, small_p_cutoff) {
-      sub("E(-?)\\+?0?(\\d+)", "&times;<sup>\\1\\2</sup>", sprintf("%.1E", p))
-    }
-  }
-
-  ifelse(
-    is.na(p) | p == "",
-    "",
-    ifelse(
-      p >= small_p_cutoff,
-      sprintf("%.*f", p_digits, p),
-      small_p_func(p, small_p_cutoff)
-    )
-  )
-}
-
 #' Row with type selected by firsttable
 
 #' @inheritParams wilcox_row
@@ -334,6 +317,15 @@ pretty_p <- function(p,
 #'
 #' @import rlang
 #' @export
+#'
+#' @examples
+#' library(survival)
+#' first_table(lung,
+#'   .column_variable = Surv(time, status),
+#'   .options = list(include_n = TRUE, include_n_per_col = TRUE),
+#'    `Meal calories` = first_table_row(meal.cal, row_digits = 2)
+#'  )
+
 
 first_table_row <- function(data_item,
                            data = NULL,

@@ -42,3 +42,11 @@ the type of row determined from the \code{class} of the data. This allows a
 both a standard \code{\link{first_table}} and one that uses a
 \code{\link[survival]{Surv}} column.
 }
+\examples{
+library(survival)
+first_table(lung,
+  .column_variable = Surv(time, status),
+  .options = list(include_n = TRUE, include_n_per_col = TRUE),
+   `Meal calories` = first_table_row(meal.cal, row_digits = 2)
+ )
+}

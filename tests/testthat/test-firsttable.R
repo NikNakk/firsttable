@@ -3,6 +3,12 @@ test_that(
   {
     mtcars_6_8 <- subset(mtcars, cyl %in% c(6, 8))
     mtcars_6_8 <- mtcars_6_8[!duplicated(mtcars_6_8$mpg), ]
+    hair_eye_color <-
+      data.frame(
+        hair = rep(rep(dimnames(HairEyeColor)[[1]], 8), c(HairEyeColor)),
+        eye = rep(rep(rep(dimnames(HairEyeColor)[[2]], each = 4), 2), c(HairEyeColor)),
+        sex = rep(rep(dimnames(HairEyeColor)[[3]], each = 16), c(HairEyeColor))
+      )
     expect_equal(
       first_table(mtcars_6_8, mpg, factor(gear), am == 0),
       structure(
@@ -68,6 +74,21 @@ test_that(
         .Dim = c(1L, 6L),
         .Dimnames = list(NULL, c("Variable", "n", "Level", "6", "8", "p"))
       )
+    )
+    expect_equal(
+      first_table(
+        hair_eye_color,
+        .column_variable = sex,
+        chisq_row(hair),
+        chisq_row(eye)
+      ),
+      structure(c("hair", "", "", "", "eye", "", "", "", "Black", "Blond",
+                  "Brown", "Red", "Blue", "Brown", "Green", "Hazel", "52 (16.6%)",
+                  "81 (25.9%)", "143 (45.7%)", "37 (11.8%)", "114 (36.4%)", "122 (39.0%)",
+                  "31 (9.9%)", "46 (14.7%)", "56 (20.1%)", "46 (16.5%)", "143 (51.3%)",
+                  "34 (12.2%)", "101 (36.2%)", "98 (35.1%)", "33 (11.8%)", "47 (16.8%)",
+                  "0.046", "", "", "", "0.675", "", "", ""), .Dim = c(8L, 5L), .Dimnames = list(
+                    NULL, c("Variable", "Level", "Female", "Male", "p")))
     )
   })
 test_that(

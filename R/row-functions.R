@@ -265,7 +265,6 @@ chisq_row <- function(data_item,
     data_filter = enquo(data_filter),
     data_function = function(row_item, col_item, ft_options) {
       digits <- row_digits %||% ft_options$digits
-      workspace <- workspace %||% ft_options$workspace
       tab <- table(row_item, col_item)
       totals <- colSums(tab, na.rm = na.rm)
       output <- sprintf(

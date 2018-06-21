@@ -143,10 +143,10 @@ mean_sd <- function(row_item, col_item, digits, na.rm) {
 #'   kruskal_row(disp, row_digits = 2)
 #' )
 kruskal_row <- function(data_item,
-                       data = NULL,
-                       data_filter = NULL,
-                       row_digits = NULL,
-                       na.rm = TRUE) {
+                        data = NULL,
+                        data_filter = NULL,
+                        row_digits = NULL,
+                        na.rm = TRUE) {
   list(
     data_item = enquo(data_item),
     data = data,
@@ -232,6 +232,71 @@ fisher_row <- function(data_item,
     }
   )
 }
+
+# chisq_row --------------------------------------------------------------
+
+#' Row using chi squared test
+#'
+#' @inheritParams wilcox_row
+#' @param na.rm whether to include NA in the denominator for percentages
+#' @param reference_level a level of the variable to drop from display
+#' @param include_reference whether to include the first level of the factor
+#'        in the report
+#'
+#' @export
+#'
+#' @examples
+#' first_table(
+#'   mtcars,
+#'   .column_variable = cyl,
+#'   chisq_row(gear, row_digits = 2, include_reference = TRUE)
+#' )
+
+chisq_row <- function(data_item,
+                      data = NULL,
+                      data_filter = NULL,
+                      row_digits = NULL,
+                      na.rm = TRUE,
+                      reference_level = NULL,
+                      include_reference = TRUE) {
+  list(
+    data_item = enquo(data_item),
+    data = data,
+    data_filter = enquo(data_filter),
+    data_function = function(row_item, col_item, ft_options) {
+      digits <- row_digits %||% ft_options$digits
+      tab <- table(row_item, col_item)
+      totals <- colSums(tab, na.rm = na.rm)
+      output <- sprintf(
+        "%2$d (%3$.*1$f%%)",
+        digits,
+        tab,
+        tab / rep(totals, each = nrow(tab)) * 100
+      )
+      dim(output) <- dim(tab)
+      output <- cbind(rownames(tab), output)
+      if (!include_reference && is.null(reference_level)) {
+        reference_level <- rownames(tab)[1]
+      }
+      if (!is.null(reference_level)) {
+        output <- output[rownames(tab) != reference_level, , drop = FALSE]
+      }
+      list(
+        row_output = output,
+        p = if (ft_options$include_p) {
+          if (all(dim(tab) > 1L)) {
+            stats::chisq.test(tab)$p.value
+          } else {
+            NA_real_
+          }
+        } else {
+          NULL
+        }
+      )
+    }
+  )
+}
+
 
 #' Cox Proportional Hazards Row
 #'
@@ -328,14 +393,14 @@ coxph_row <- function(data_item,
 
 
 first_table_row <- function(data_item,
-                           data = NULL,
-                           data_filter = NULL,
-                           row_digits = NULL,
-                           na.rm = TRUE,
-                           reference_level = NULL,
-                           include_reference = NULL,
-                           workspace = NULL,
-                           non_parametric = NULL) {
+                            data = NULL,
+                            data_filter = NULL,
+                            row_digits = NULL,
+                            na.rm = TRUE,
+                            reference_level = NULL,
+                            include_reference = NULL,
+                            workspace = NULL,
+                            non_parametric = NULL) {
   data_item <- enquo(data_item)
   data_filter <- enquo(data_filter)
   list(

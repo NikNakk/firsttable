@@ -7,7 +7,8 @@
 first_table_options(digits = 1, include_p = TRUE, p_digits = 3,
   small_p_format = c("<", "E", "x10", "html"), small_p_cutoff = NULL,
   include_n = FALSE, include_n_per_col = FALSE, workspace = 2e+05,
-  default_non_parametric = TRUE, na_text = "NA", pretty_p = TRUE)
+  default_non_parametric = TRUE, na_text = "NA", pretty_p = TRUE,
+  escape_name = TRUE, hide_single_level = FALSE)
 }
 \arguments{
 \item{digits}{digits used for formatting variables by default}
@@ -32,6 +33,10 @@ continuous variables}
 \item{na_text}{text to use for NA values}
 
 \item{pretty_p}{whether to format p values for display}
+
+\item{escape_name}{whether to escape the row name when displayed as HTML}
+
+\item{hide_single_level}{whether to hide levels for factors when only one}
 }
 \description{
 First Table options

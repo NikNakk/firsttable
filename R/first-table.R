@@ -12,7 +12,9 @@
 #'   continuous variables
 #' @param na_text text to use for NA values
 #' @param pretty_p whether to format p values for display
-
+#' @param escape_name whether to escape the row name when displayed as HTML
+#' @param hide_single_level whether to hide levels for factors when only one
+#'
 #' @export
 first_table_options <- function(
   digits = 1,

@@ -26,7 +26,8 @@ first_table_options <- function(
   default_non_parametric = TRUE,
   na_text = "NA",
   pretty_p = TRUE,
-  escape_name = TRUE
+  escape_name = TRUE,
+  hide_single_level = FALSE
 ) {
   list(
     digits = digits,
@@ -40,7 +41,8 @@ first_table_options <- function(
     default_non_parametric = default_non_parametric,
     na_text = na_text,
     pretty_p = pretty_p,
-    escape_name = escape_name
+    escape_name = escape_name,
+    hide_single_level = hide_single_level
   )
 }
 
@@ -245,6 +247,9 @@ first_table_df <- function(.data,
       p = NA_character_,
       stringsAsFactors = FALSE
     )
+    if (nrow(row_output) == 1L && ft_options$hide_single_level) {
+      row_output$Level <- ""
+    }
     if (ft_options$include_n) {
       row_output$n <- sum(!is.na(row_item) & !is.na(current_col_item))
     } else {
@@ -362,6 +367,10 @@ first_table_hux <- function(.data,
     if (ft_options$small_p_format == "html") {
       huxtable::escape_contents(ht_out)[, "p"] <- FALSE
     }
+  }
+
+  if (!ft_options$include_n) {
+    huxtable::colspan(ht_out)[which(df_out$Level == ""), 1] <- 2
   }
 
   huxtable::escape_contents(ht_out)[, "Variable"] <- ft_options$escape_name

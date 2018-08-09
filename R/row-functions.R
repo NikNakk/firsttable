@@ -29,7 +29,7 @@ wilcox_row <- function(data_item,
     data_filter = enquo(data_filter),
     data_function = function(row_item, col_item, ft_options) {
       digits <- row_digits %||% ft_options$digits
-      list(row_output = med_iqr(row_item, col_item, digits, na.rm),
+      list(row_output = med_iqr(row_item, col_item, digits, na.rm, ft_options$na_text),
            p = if (ft_options$include_p) {
              if (length(unique(col_item[!is.na(row_item)])) == 2L) {
                stats::wilcox.test(row_item ~ col_item)$p.value
@@ -45,23 +45,23 @@ wilcox_row <- function(data_item,
 
 # med_iqr -----------------------------------------------------------------
 
-med_iqr <- function(row_item, col_item, digits, na.rm) {
-  quartiles <- tapply(
-    row_item,
-    col_item,
+med_iqr <- function(row_item, col_item, digits, na.rm, na_text) {
+  quartiles <- lapply(
+    split(row_item, col_item),
     stats::quantile,
     probs = seq(0.25, 0.75, 0.25),
-    na.rm = na.rm,
-    simplify = FALSE
+    na.rm = na.rm
   )
   quartiles <- simplify2array(quartiles)
-  sprintf(
+  out <- sprintf(
     "%2$.*1$f (%3$.*1$f - %4$.*1$f)",
     digits,
     quartiles[2, ],
     quartiles[1, ],
     quartiles[3, ]
   )
+  out[out == "NA (NA - NA)"] <- na_text
+  out
 }
 
 # parametric_row --------------------------------------------------------------
@@ -93,7 +93,7 @@ parametric_row <- function(data_item,
     data_filter = enquo(data_filter),
     data_function = function(row_item, col_item, ft_options) {
       digits <- row_digits %||% ft_options$digits
-      list(row_output = mean_sd(row_item, col_item, digits, na.rm),
+      list(row_output = mean_sd(row_item, col_item, digits, na.rm, ft_options$na_text),
            p = if (ft_options$include_p) {
              if (length(unique(col_item[!is.na(row_item)])) == 2L) {
                stats::t.test(row_item ~ col_item)$p.value
@@ -109,20 +109,20 @@ parametric_row <- function(data_item,
 
 # mean_sd -----------------------------------------------------------------
 
-mean_sd <- function(row_item, col_item, digits, na.rm) {
-  values <- tapply(
-    row_item,
-    col_item,
-    function(x) {c(mean(x, na.rm = na.rm), stats::sd(x, na.rm = na.rm))},
-    simplify = FALSE
+mean_sd <- function(row_item, col_item, digits, na.rm, na_text) {
+  values <- lapply(
+    split(row_item, col_item),
+    function(x) {c(mean(x, na.rm = na.rm), stats::sd(x, na.rm = na.rm))}
   )
   values <- simplify2array(values)
-  sprintf(
+  out <- sprintf(
     "%2$.*1$f (%3$.*1$f)",
     digits,
     values[1, ],
     values[2, ]
   )
+  out[out == "NA (NA)"] <- na_text
+  out
 }
 
 # kruskal_row --------------------------------------------------------------
@@ -154,7 +154,7 @@ kruskal_row <- function(data_item,
     data_function = function(row_item, col_item, ft_options) {
       digits <- row_digits %||% ft_options$digits
       list(
-        row_output = med_iqr(row_item, col_item, digits, na.rm),
+        row_output = med_iqr(row_item, col_item, digits, na.rm, ft_options$na_text),
         p = if (ft_options$include_p) {
           stats::kruskal.test(row_item ~ col_item)$p.value
         } else {

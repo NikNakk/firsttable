@@ -10,6 +10,7 @@
 #' @param workspace default workspace passed onto \code{\link[stats]{fisher.test}}
 #' @param default_non_parametric whether to default to non parametric tests for
 #'   continuous variables
+#' @param na text to use for NA values
 
 #' @export
 first_table_options <- function(
@@ -21,7 +22,8 @@ first_table_options <- function(
   include_n = FALSE,
   include_n_per_col = FALSE,
   workspace = 2e5,
-  default_non_parametric = TRUE
+  default_non_parametric = TRUE,
+  na_text = "NA"
 ) {
   list(
     digits = digits,
@@ -32,7 +34,8 @@ first_table_options <- function(
     include_n = include_n,
     include_n_per_col = include_n_per_col,
     workspace = workspace,
-    default_non_parametric = default_non_parametric
+    default_non_parametric = default_non_parametric,
+    na_text = na_text
   )
 }
 

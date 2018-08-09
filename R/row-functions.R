@@ -332,35 +332,39 @@ coxph_row <- function(data_item,
     data_filter = enquo(data_filter),
     data_function = function(row_item, col_item, ft_options) {
       digits <- row_digits %||% ft_options$digits
-      model <- survival::coxph(col_item ~ row_item)
-      hrs <- exp(stats::coef(model))
-      cis <- exp(stats::confint(model))
-      ps <- stats::pchisq(
-        (summary(model)$coefficients[, "z", drop = TRUE]) ^ 2,
-        df = 1,
-        lower.tail = FALSE
-      )
-      if (names(hrs)[1L] == "row_item") {
-        levs <- ""
-        cis <- matrix(cis, ncol = 2)
+      if (!all(is.na(row_item))) {
+        model <- survival::coxph(col_item ~ row_item)
+        hrs <- exp(stats::coef(model))
+        cis <- exp(stats::confint(model))
+        ps <- stats::pchisq(
+          (summary(model)$coefficients[, "z", drop = TRUE]) ^ 2,
+          df = 1,
+          lower.tail = FALSE
+        )
+        if (names(hrs)[1L] == "row_item") {
+          levs <- ""
+          cis <- matrix(cis, ncol = 2)
+        } else {
+          levs <- sub("row_item", "", names(hrs))
+        }
+        output <- sprintf(
+          "%2$.*1$f (%3$.*1$f - %4$.*1$f)",
+          digits,
+          hrs,
+          cis[, 1, drop = TRUE],
+          cis[, 2, drop = TRUE]
+        )
+        if (include_reference & !identical(levs, "") & !is.logical(row_item)) {
+          output <- c("Reference", output)
+          levs <- c(levels(as.factor(row_item))[1L], levs)
+          ps <- c(NA, ps)
+        }
+        list(row_output = cbind(levs, output),
+             p = if (ft_options$include_p) ps else NULL
+        )
       } else {
-        levs <- sub("row_item", "", names(hrs))
+        list(row_output = matrix(c("", ft_options$na_text), nrow = 1), p = NA_real_)
       }
-      output <- sprintf(
-        "%2$.*1$f (%3$.*1$f - %4$.*1$f)",
-        digits,
-        hrs,
-        cis[, 1, drop = TRUE],
-        cis[, 2, drop = TRUE]
-      )
-      if (include_reference & !identical(levs, "") & !is.logical(row_item)) {
-        output <- c("Reference", output)
-        levs <- c(levels(as.factor(row_item))[1L], levs)
-        ps <- c(NA, ps)
-      }
-      list(row_output = cbind(levs, output),
-           p = if (ft_options$include_p) ps else NULL
-      )
     }
   )
 

@@ -7,7 +7,7 @@
 first_table_options(digits = 1, include_p = TRUE, p_digits = 3,
   small_p_format = c("<", "E", "x10", "html"), small_p_cutoff = NULL,
   include_n = FALSE, include_n_per_col = FALSE, workspace = 2e+05,
-  default_non_parametric = TRUE)
+  default_non_parametric = TRUE, na_text = "NA")
 }
 \arguments{
 \item{digits}{digits used for formatting variables by default}
@@ -28,6 +28,8 @@ first_table_options(digits = 1, include_p = TRUE, p_digits = 3,
 
 \item{default_non_parametric}{whether to default to non parametric tests for
 continuous variables}
+
+\item{na_text}{text to use for NA values}
 }
 \description{
 First Table options

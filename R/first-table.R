@@ -10,7 +10,7 @@
 #' @param workspace default workspace passed onto \code{\link[stats]{fisher.test}}
 #' @param default_non_parametric whether to default to non parametric tests for
 #'   continuous variables
-#' @param na text to use for NA values
+#' @param na_text text to use for NA values
 
 #' @export
 first_table_options <- function(

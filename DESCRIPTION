@@ -14,6 +14,9 @@ RoxygenNote: 6.0.1
 Suggests: testthat,
   dplyr,
   survival,
-    knitr,
-    rmarkdown
+  knitr,
+  rmarkdown,
+  flextable,
+  officer,
+  huxtable
 VignetteBuilder: knitr

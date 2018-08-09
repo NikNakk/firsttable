@@ -2,9 +2,21 @@
 % Please edit documentation in R/first-table.R
 \name{first_table}
 \alias{first_table}
+\alias{first_table_df}
+\alias{first_table_flextable}
+\alias{first_table_hux}
 \title{First Table}
 \usage{
 first_table(.data, ..., .column_variable = NULL,
+  .options = first_table_options())
+
+first_table_df(.data, ..., .column_variable = NULL,
+  .options = first_table_options())
+
+first_table_flextable(.data, ..., .column_variable = NULL,
+  .options = first_table_options())
+
+first_table_hux(.data, ..., .column_variable = NULL,
   .options = first_table_options())
 }
 \arguments{
@@ -17,7 +29,8 @@ first_table(.data, ..., .column_variable = NULL,
 \item{.options}{options to use for formatting (see details)}
 }
 \value{
-character matrix with the requested rows and columns
+character matrix (\code{first_table}) or \code{data.frame}
+(\code{first_table}) with the requested rows and columns;
 }
 \description{
 First Table
@@ -33,8 +46,8 @@ support the \code{\link[rlang]{quasiquotation}} operators such as \code{\link[rl
 
 Options can be specified as a list or by using \code{\link{first_table_options}}.
 
-The output is a character matrix which is formatted so as to work well with \code{\link[pander]{pander}}
-and \code{\link[knitr]{knit}}.
+The output for \code{first_table} is a character matrix which is formatted so as to work well with \code{\link[pander]{pander}}
+and \code{\link[knitr]{knit}}. \code{first_table_df} returns a data.frame.
 }
 \examples{
 first_table(mtcars,

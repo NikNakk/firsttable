@@ -11,6 +11,7 @@
 #' @param default_non_parametric whether to default to non parametric tests for
 #'   continuous variables
 #' @param na_text text to use for NA values
+#' @param pretty_p whether to format p values for display
 
 #' @export
 first_table_options <- function(
@@ -23,19 +24,23 @@ first_table_options <- function(
   include_n_per_col = FALSE,
   workspace = 2e5,
   default_non_parametric = TRUE,
-  na_text = "NA"
+  na_text = "NA",
+  pretty_p = TRUE,
+  escape_name = TRUE
 ) {
   list(
     digits = digits,
     include_p = include_p,
     p_digits = p_digits,
-    small_p_format = small_p_format,
+    small_p_format = match.arg(small_p_format),
     small_p_cutoff = small_p_cutoff,
     include_n = include_n,
     include_n_per_col = include_n_per_col,
     workspace = workspace,
     default_non_parametric = default_non_parametric,
-    na_text = na_text
+    na_text = na_text,
+    pretty_p = pretty_p,
+    escape_name = escape_name
   )
 }
 
@@ -45,7 +50,8 @@ first_table_options <- function(
 #' @param .column_variable variable used for columns (if any)
 #' @param .options options to use for formatting (see details)
 #' @param ... row details
-#' @return character matrix with the requested rows and columns
+#' @return character matrix (\code{first_table}) or \code{data.frame}
+#' (\code{first_table}) with the requested rows and columns;
 #'
 #' @details This function takes a \code{\link[base]{data.frame}} or \code{\link[tibble]{tibble}}
 #' and a row and column specification and generates a table along the lines of the first table
@@ -58,8 +64,8 @@ first_table_options <- function(
 #' Options can be specified as a list or by using \code{\link{first_table_options}}.
 
 #'
-#' The output is a character matrix which is formatted so as to work well with \code{\link[pander]{pander}}
-#' and \code{\link[knitr]{knit}}.
+#' The output for \code{first_table} is a character matrix which is formatted so as to work well with \code{\link[pander]{pander}}
+#' and \code{\link[knitr]{knit}}. \code{first_table_df} returns a data.frame.
 #'
 #' @export
 #' @import rlang
@@ -92,6 +98,33 @@ first_table_options <- function(
 #' )
 
 first_table <- function(.data,
+                        ...,
+                        .column_variable = NULL,
+                        .options = first_table_options()
+) {
+  ft_options <- first_table_options()
+  if (!missing(.options)) {
+    stopifnot(is.list(.options))
+    ft_options[names(.options)] <- .options
+  }
+
+  df_out <- eval_tidy(first_table_df(.data, !!!enquos(...), .column_variable = !!enquo(.column_variable), .options = ft_options))
+  df_out$Variable[duplicated(df_out$Variable)] <- ""
+  if (ft_options$include_n) {
+    df_out$n[df_out$Variable == ""] <- ""
+  }
+  if (ft_options$include_p &&
+      "p" %in% colnames(df_out) &&
+      !("Hazard ratio (95% CI)" %in% colnames(df_out))) {
+    df_out$p[df_out$Variable == ""] <- ""
+  }
+  as.matrix(df_out)
+}
+
+#' @export
+#'
+#' @rdname first_table
+first_table_df <- function(.data,
                       ...,
                       .column_variable = NULL,
                       .options = first_table_options()
@@ -129,7 +162,7 @@ first_table <- function(.data,
     row_details[poss_legacy_options] <- NULL
   }
 
-  ft_options$small_p_format <- match.arg(ft_options$small_p_format, first_table_options()$small_p_format)
+  ft_options$small_p_format <- match.arg(ft_options$small_p_format, c("<", "E", "x10", "html"))
 
   if (is.null(ft_options$small_p_cutoff)) {
     ft_options$small_p_cutoff <- 10 ^ -ft_options$p_digits
@@ -154,6 +187,16 @@ first_table <- function(.data,
 
   row_names <- names(row_details)
   row_names[row_names == ""] <- NA_character_
+
+  if (!is.null(get_expr(column_variable))) {
+    if (!inherits(col_item, "Surv")) {
+      col_names <- levels(col_item)
+    } else {
+      col_names <- "Hazard ratio (95% CI)"
+    }
+  } else {
+    col_names <- "Value"
+  }
 
   for (i in seq_along(row_details)) {
     details_item <- row_details[[i]]
@@ -191,57 +234,149 @@ first_table <- function(.data,
 
     row_output <- output_data$row_output
     if (!is.array(row_output)) {
-      row_output <- matrix(c("", row_output), nrow = 1L)
+      row_output <- matrix(c("", row_output), nrow = 1)
     }
-    pad_item <- function(item) {
-      mat <- matrix("", ncol = 1, nrow = nrow(row_output))
-      mat[1:length(item)] <- item
-      mat
-    }
+    colnames(row_output) <- c("Level", col_names)
+
+    row_output <- cbind.data.frame(
+      Variable = row_names[i],
+      n = NA_integer_,
+      row_output,
+      p = NA_character_,
+      stringsAsFactors = FALSE
+    )
     if (ft_options$include_n) {
-      row_output <- cbind(pad_item(sum(!is.na(row_item) & !is.na(current_col_item))), row_output)
+      row_output$n <- sum(!is.na(row_item) & !is.na(current_col_item))
+    } else {
+      row_output$n <- NULL
     }
-    row_output <- cbind(pad_item(row_names[i]), row_output)
     if (ft_options$include_p) {
-      row_output <- cbind(
-        row_output,
-        pad_item(pretty_p(output_data$p, ft_options$p_digits, ft_options$small_p_format, ft_options$small_p_cutoff))
-      )
+      if (ft_options$pretty_p) {
+        row_output$p <- pretty_p(output_data$p, ft_options$p_digits, ft_options$small_p_format, ft_options$small_p_cutoff)
+      } else {
+        row_output$p <- output_data$p
+      }
+    } else {
+      row_output$p <- NULL
     }
     output[[i]] <- row_output
   }
 
-  output <- invoke(rbind, output)
-
-  col_names <- c("Variable")
-  if (ft_options$include_n) {
-    col_names <- c(col_names, "n")
-  }
-  col_names <- c(col_names, "Level")
-  if (!is.null(get_expr(column_variable))) {
-    if (!inherits(col_item, "Surv")) {
-      col_names <- c(col_names, levels(col_item))
-    } else {
-      col_names <- c(col_names, "Hazard ratio (95% CI)")
-    }
-  } else {
-    col_names <- c(col_names, "Value")
-  }
-  if (ft_options$include_p) {
-    col_names <- c(col_names, "p")
-  }
-  colnames(output) <- col_names
-
   if (ft_options$include_n_per_col && n_col >= 1) {
-    row_with_n <- matrix("", ncol = ncol(output), nrow = 1)
-    colnames(row_with_n) <- col_names
-    row_with_n[1, "Variable"] <- "n"
+    row_with_n <- cbind.data.frame(
+      Variable = "n",
+      Level = "",
+      n = as.character(nrow(.data)),
+      `colnames<-`(matrix(NA_character_, ncol = length(col_names), nrow = 1), col_names),
+      p = "",
+      stringsAsFactors = FALSE
+    )
+    if (!ft_options$include_n) {
+      row_with_n$n <- NULL
+    }
+    if (!ft_options$include_p) {
+      row_with_n$p <- NULL
+    }
     row_with_n[1, levels(col_item)] <- table(col_item)[levels(col_item)]
-    output <- rbind(row_with_n, output)
+    output <- c(list(row_with_n), output)
+  }
+  invoke(rbind, output)
+}
+
+#' @export
+#'
+#' @rdname first_table
+first_table_flextable <- function(.data,
+                                  ...,
+                                  .column_variable = NULL,
+                                  .options = first_table_options()) {
+  if (!requireNamespace("flextable", quietly = TRUE) ||
+      !requireNamespace("officer", quietly = TRUE)) {
+    stop("`first_table_flextable` requires the flextable and officer packages")
+  }
+  ft_options <- first_table_options()
+  if (!missing(.options)) {
+    stopifnot(is.list(.options))
+    ft_options[names(.options)] <- .options
   }
 
-  output
+  df_out <-
+    eval_tidy(
+      first_table_df(.data, !!!enquos(...),.column_variable = !!enquo(.column_variable),
+      .options = ft_options
+    ))
+  rows_to_merge <- split(seq_len(nrow(df_out)), df_out$Variable)
+  cols_to_merge <- "Variable"
+  if (ft_options$include_n) {
+    cols_to_merge <- c(cols_to_merge, "n")
+  }
+  if (ft_options$include_p &&
+      "p" %in% colnames(df_out) &&
+      !("Hazard ratio (95% CI)" %in% colnames(df_out))) {
+    cols_to_merge <- c(cols_to_merge, "p")
+  }
+
+  ft_out <- flextable::regulartable(df_out)
+  ft_out <- flextable::style(ft_out, j = cols_to_merge, pr_c = officer::fp_cell(vertical.align = "top"))
+  for (rtm in rows_to_merge) {
+    for (ctm in cols_to_merge) {
+      ft_out <- flextable::merge_at(ft_out, i = rtm, j = ctm)
+    }
+  }
+  flextable::autofit(ft_out)
 }
+
+#' @export
+#'
+#' @rdname first_table
+first_table_hux <- function(.data,
+                                  ...,
+                                  .column_variable = NULL,
+                                  .options = first_table_options()) {
+  if (!requireNamespace("huxtable", quietly = TRUE)) {
+    stop("`first_table_huxtable` requires the huxtable package")
+  }
+  ft_options <- first_table_options()
+  if (!missing(.options)) {
+    stopifnot(is.list(.options))
+    ft_options[names(.options)] <- .options
+  }
+
+  df_out <-
+    eval_tidy(
+      first_table_df(.data, !!!enquos(...),.column_variable = !!enquo(.column_variable),
+                     .options = ft_options
+      ))
+  rows_to_merge <- split(seq_len(nrow(df_out)), df_out$Variable)
+  cols_to_merge <- "Variable"
+
+  ht_out <- huxtable::hux(df_out)
+
+  if (ft_options$include_n) {
+    cols_to_merge <- c(cols_to_merge, "n")
+  }
+  if (ft_options$include_p &&
+      "p" %in% colnames(df_out) &&
+      !("Hazard ratio (95% CI)" %in% colnames(df_out))) {
+    cols_to_merge <- c(cols_to_merge, "p")
+    if (ft_options$small_p_format == "html") {
+      huxtable::escape_contents(ht_out)[, "p"] <- FALSE
+    }
+  }
+
+  huxtable::escape_contents(ht_out)[, "Variable"] <- ft_options$escape_name
+
+  for (rtm in rows_to_merge) {
+    for (ctm in cols_to_merge) {
+      huxtable::rowspan(ht_out)[rtm[1], ctm] <- length(rtm)
+    }
+  }
+  ht_out <- huxtable::add_colnames(ht_out)
+  ht_out <- huxtable::set_all_borders(ht_out, 1)
+  ht_out <- huxtable::set_bold(ht_out, 1, huxtable::everywhere, TRUE)
+  ht_out
+}
+
 
 get_column_item <- function(.column_variable, .data) {
   if (!is.null(get_expr(.column_variable))) {

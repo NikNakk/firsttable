@@ -155,7 +155,7 @@ kruskal_row <- function(data_item,
       digits <- row_digits %||% ft_options$digits
       list(
         row_output = med_iqr(row_item, col_item, digits, na.rm, ft_options$na_text),
-        p = if (ft_options$include_p) {
+        p = if (ft_options$include_p && length(unique(row_item)) > 1L) {
           stats::kruskal.test(row_item ~ col_item)$p.value
         } else {
           NULL

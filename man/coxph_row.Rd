@@ -14,7 +14,7 @@ coxph_row(data_item, data = NULL, data_filter = NULL, row_digits = NULL,
 
 \item{data_filter}{filter to apply to dataset}
 
-\item{row_digits}{Number of digits to include in the OR}
+\item{row_digits}{Number of digits to include in the HR}
 
 \item{include_reference}{whether to include a row for the reference level of
 a factor}

@@ -6,7 +6,9 @@
 \usage{
 first_table_row(data_item, data = NULL, data_filter = NULL,
   row_digits = NULL, na.rm = TRUE, reference_level = NULL,
-  include_reference = NULL, workspace = NULL, non_parametric = NULL)
+  include_reference = NULL, workspace = NULL, non_parametric = NULL,
+  row_digits_default = NULL, row_digits_surv = NULL,
+  row_digits_numeric = NULL)
 }
 \arguments{
 \item{data_item}{item to be taken from data for row}
@@ -28,6 +30,13 @@ a factor (only relevant for logical/factor/character variables)}
 \item{workspace}{passed onto \code{\link[stats]{fisher.test}}}
 
 \item{non_parametric}{whether to use non-parametric tests}
+
+\item{rows_digits_default}{digits where \code{.column_type = "default"}}
+
+\item{rows_digits_surv}{digits where \code{.column_type = "default"} and
+\code{.column_variable} inherits \code{Surv}}
+
+\item{rows_digits_numeric}{digits where \code{.column_type = "numeric"}}
 }
 \value{
 row for inclusion in `first_table`

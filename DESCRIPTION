@@ -16,7 +16,5 @@ Suggests: testthat,
   survival,
   knitr,
   rmarkdown,
-  flextable,
-  officer,
   huxtable
 VignetteBuilder: knitr

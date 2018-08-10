@@ -2,22 +2,10 @@
 % Please edit documentation in R/first-table.R
 \name{first_table}
 \alias{first_table}
-\alias{first_table_df}
-\alias{first_table_flextable}
-\alias{first_table_hux}
 \title{First Table}
 \usage{
-first_table(.data, ..., .column_variable = NULL,
-  .options = first_table_options())
-
-first_table_df(.data, ..., .column_variable = NULL,
-  .options = first_table_options())
-
-first_table_flextable(.data, ..., .column_variable = NULL,
-  .options = first_table_options())
-
-first_table_hux(.data, ..., .column_variable = NULL,
-  .options = first_table_options())
+first_table(.data, ..., .column_variable = NULL, .column_type = c("default",
+  "numeric"), .options = first_table_options())
 }
 \arguments{
 \item{.data}{`data.frame` or `tibble` to use as data source}
@@ -26,11 +14,12 @@ first_table_hux(.data, ..., .column_variable = NULL,
 
 \item{.column_variable}{variable used for columns (if any)}
 
+\item{.column_type}{type of column (default or numeric)}
+
 \item{.options}{options to use for formatting (see details)}
 }
 \value{
-character matrix (\code{first_table}) or \code{data.frame}
-(\code{first_table}) with the requested rows and columns;
+object of class \code{first_table}  with the requested rows and columns;
 }
 \description{
 First Table
@@ -45,9 +34,6 @@ support the \code{\link[rlang]{quasiquotation}} operators such as \code{\link[rl
 \code{\link[rlang]{!!!}}.
 
 Options can be specified as a list or by using \code{\link{first_table_options}}.
-
-The output for \code{first_table} is a character matrix which is formatted so as to work well with \code{\link[pander]{pander}}
-and \code{\link[knitr]{knit}}. \code{first_table_df} returns a data.frame.
 }
 \examples{
 first_table(mtcars,

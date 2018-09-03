@@ -9,7 +9,8 @@ first_table_options(digits = 1, include_p = TRUE, p_digits = 3,
   include_n = FALSE, include_n_per_col = c("no", "row", "embed"),
   workspace = 2e+05, default_non_parametric = TRUE, na_text = "NA",
   pretty_p = TRUE, escape_name = TRUE, hide_single_level = FALSE,
-  cor_method = c("pearson", "kendall", "spearman"), digits_percent = digits)
+  cor_method = c("pearson", "kendall", "spearman"), digits_percent = digits,
+  include_denom = FALSE, percent_first = FALSE)
 }
 \arguments{
 \item{digits}{digits used for formatting variables by default}
@@ -43,6 +44,12 @@ continuous variables}
 
 \item{digits_percent}{digits used by default for percentages
 (overrides \code{digits})}
+
+\item{include_denom}{whether to include the denominator for categorical
+variables}
+
+\item{percent_first}{whether to put the percent before the n for categorical
+variables}
 }
 \description{
 First Table options

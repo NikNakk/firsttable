@@ -180,6 +180,10 @@ kruskal_row <- function(data_item,
 #' @param include_reference whether to include the first level of the factor
 #'        in the report
 #' @param workspace passed onto \code{\link[stats]{fisher.test}}
+#' @param include_denom whether to include the denominator for categorical
+#'   variables
+#' @param percent_first whether to put the percent before the n for categorical
+#'   variables
 #'
 #' @export
 #'
@@ -197,7 +201,10 @@ fisher_row <- function(data_item,
                        na.rm = TRUE,
                        reference_level = NULL,
                        include_reference = TRUE,
-                       workspace = NULL) {
+                       workspace = NULL,
+                       include_denom = NULL,
+                       percent_first = NULL
+                       ) {
   list(
     data_item = enquo(data_item),
     data = data,
@@ -205,22 +212,19 @@ fisher_row <- function(data_item,
     data_function = function(row_item, col_item, ft_options) {
       digits <- row_digits %||% ft_options$digits_percent
       workspace <- workspace %||% ft_options$workspace
+      include_denom <- include_denom %||% ft_options$include_denom
+      percent_first <- percent_first %||% ft_options$percent_first
       tab <- table(row_item, col_item)
-      totals <- colSums(tab, na.rm = na.rm)
-      output <- sprintf(
-        "%2$d (%3$.*1$f%%)",
-        digits,
-        tab,
-        tab / rep(totals, each = nrow(tab)) * 100
-      )
-      dim(output) <- dim(tab)
-      output <- cbind(rownames(tab), output)
-      if (!include_reference && is.null(reference_level)) {
-        reference_level <- rownames(tab)[1]
-      }
-      if (!is.null(reference_level)) {
-        output <- output[rownames(tab) != reference_level, , drop = FALSE]
-      }
+      output <-
+        n_percent(
+          tab,
+          na.rm = na.rm,
+          digits = digits,
+          include_denom = include_denom,
+          percent_first = percent_first,
+          include_reference = include_reference,
+          reference_level = reference_level
+        )
       list(
         row_output = output,
         p = if (ft_options$include_p) {
@@ -262,29 +266,28 @@ chisq_row <- function(data_item,
                       row_digits = NULL,
                       na.rm = TRUE,
                       reference_level = NULL,
-                      include_reference = TRUE) {
+                      include_reference = TRUE,
+                      include_denom = NULL,
+                      percent_first = NULL) {
   list(
     data_item = enquo(data_item),
     data = data,
     data_filter = enquo(data_filter),
     data_function = function(row_item, col_item, ft_options) {
       digits <- row_digits %||% ft_options$digits_percent
+      include_denom <- include_denom %||% ft_options$include_denom
+      percent_first <- percent_first %||% ft_options$percent_first
       tab <- table(row_item, col_item)
-      totals <- colSums(tab, na.rm = na.rm)
-      output <- sprintf(
-        "%2$d (%3$.*1$f%%)",
-        digits,
-        tab,
-        tab / rep(totals, each = nrow(tab)) * 100
-      )
-      dim(output) <- dim(tab)
-      output <- cbind(rownames(tab), output)
-      if (!include_reference && is.null(reference_level)) {
-        reference_level <- rownames(tab)[1]
-      }
-      if (!is.null(reference_level)) {
-        output <- output[rownames(tab) != reference_level, , drop = FALSE]
-      }
+      output <-
+        n_percent(
+          tab,
+          na.rm = na.rm,
+          digits = digits,
+          include_denom = include_denom,
+          percent_first = percent_first,
+          include_reference = include_reference,
+          reference_level = reference_level
+        )
       list(
         row_output = output,
         p = if (ft_options$include_p) {
@@ -299,6 +302,36 @@ chisq_row <- function(data_item,
       )
     }
   )
+}
+
+n_percent <- function(tab, na.rm, digits, include_denom, percent_first, include_reference, reference_level) {
+  totals <- colSums(tab, na.rm = na.rm)
+  pattern <- "%2$d"
+  if (include_denom) {
+    pattern <- paste0(pattern, "/%4$d")
+  }
+  if (percent_first) {
+    pattern <- paste0("%3$.*1$f%% (", pattern, ")")
+  } else {
+    pattern <- paste0(pattern, " (%3$.*1$f%%)")
+  }
+  output <- sprintf(
+    pattern,
+    digits,
+    tab,
+    tab / rep(totals, each = nrow(tab)) * 100,
+    rep(totals, each = nrow(tab))
+  )
+
+  dim(output) <- dim(tab)
+  output <- cbind(rownames(tab), output)
+  if (!include_reference && is.null(reference_level)) {
+    reference_level <- rownames(tab)[1]
+  }
+  if (!is.null(reference_level)) {
+    output <- output[rownames(tab) != reference_level, , drop = FALSE]
+  }
+  output
 }
 
 

@@ -17,6 +17,10 @@
 #' @param cor_method default correlation method for \code{\link{cor_row}}
 #' @param digits_percent digits used by default for percentages
 #'   (overrides \code{digits})
+#' @param include_denom whether to include the denominator for categorical
+#'   variables
+#' @param percent_first whether to put the percent before the n for categorical
+#'   variables
 #'
 #' @export
 first_table_options <- function(
@@ -34,7 +38,9 @@ first_table_options <- function(
   escape_name = TRUE,
   hide_single_level = FALSE,
   cor_method = c("pearson", "kendall", "spearman"),
-  digits_percent = digits
+  digits_percent = digits,
+  include_denom = FALSE,
+  percent_first = FALSE
 ) {
   if (is.logical(include_n_per_col)) {
     if (include_n_per_col) {
@@ -58,7 +64,9 @@ first_table_options <- function(
     escape_name = escape_name,
     hide_single_level = hide_single_level,
     cor_method = match.arg(cor_method),
-    digits_percent = digits_percent
+    digits_percent = digits_percent,
+    include_denom = include_denom,
+    percent_first = percent_first
   )
 }
 

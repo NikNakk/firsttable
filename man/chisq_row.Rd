@@ -5,7 +5,8 @@
 \title{Row using chi squared test}
 \usage{
 chisq_row(data_item, data = NULL, data_filter = NULL, row_digits = NULL,
-  na.rm = TRUE, reference_level = NULL, include_reference = TRUE)
+  na.rm = TRUE, reference_level = NULL, include_reference = TRUE,
+  include_denom = NULL, percent_first = NULL)
 }
 \arguments{
 \item{data_item}{item to be taken from data for row}

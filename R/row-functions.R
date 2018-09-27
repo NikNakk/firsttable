@@ -29,16 +29,36 @@ wilcox_row <- function(data_item,
     data_filter = enquo(data_filter),
     data_function = function(row_item, col_item, ft_options) {
       digits <- row_digits %||% ft_options$digits
+      if ((ft_options$include_p || ft_options$include_estimate_diff) &&
+          length(unique(col_item[!is.na(row_item)])) == 2L) {
+        test <- stats::wilcox.test(row_item ~ col_item, conf.int = ft_options$include_estimate_diff)
+      }
       list(row_output = med_iqr(row_item, col_item, digits, na.rm, ft_options),
+           estimate_diff = if (ft_options$include_estimate_diff) {
+             if (length(unique(col_item[!is.na(row_item)])) == 2L) {
+               sprintf(
+               "%2$.*1$f (%3$.*1$f - %4$.*1$f)",
+               digits,
+               -test$estimate,
+               -test$conf.int[1],
+               -test$conf.int[2]
+             )
+             } else {
+               NA_character_
+             }
+           } else {
+             NULL
+           },
            p = if (ft_options$include_p) {
              if (length(unique(col_item[!is.na(row_item)])) == 2L) {
-               stats::wilcox.test(row_item ~ col_item)$p.value
+               test$p.value
              } else {
                NA_real_
              }
            } else {
              NULL
-           })
+           }
+           )
     }
   )
 }
@@ -93,7 +113,27 @@ parametric_row <- function(data_item,
     data_filter = enquo(data_filter),
     data_function = function(row_item, col_item, ft_options) {
       digits <- row_digits %||% ft_options$digits
+      if ((ft_options$include_p || ft_options$include_estimate_diff) &&
+          length(unique(col_item[!is.na(row_item)])) == 2L) {
+        test <- stats::t.test(row_item ~ col_item)
+      }
+
       list(row_output = mean_sd(row_item, col_item, digits, na.rm, ft_options),
+           estimate_diff = if (ft_options$include_estimate_diff) {
+             if (length(unique(col_item[!is.na(row_item)])) == 2L) {
+               sprintf(
+                 "%2$.*1$f (%3$.*1$f - %4$.*1$f)",
+                 digits,
+                 diff(test$estimate),
+                 -test$conf.int[1],
+                 -test$conf.int[2]
+               )
+             } else {
+               NA_character_
+             }
+           } else {
+             NULL
+           },
            p = if (ft_options$include_p) {
              if (length(unique(col_item[!is.na(row_item)])) == 2L) {
                stats::t.test(row_item ~ col_item)$p.value
@@ -156,7 +196,7 @@ kruskal_row <- function(data_item,
       list(
         row_output = med_iqr(row_item, col_item, digits, na.rm, ft_options),
         p = if (ft_options$include_p) {
-          if (length(unique(row_item)) > 1L) {
+          if (length(unique(col_item[!is.na(row_item)])) >= 2L) {
             stats::kruskal.test(row_item ~ factor(col_item))$p.value
           } else {
             NA_real_
@@ -204,14 +244,13 @@ fisher_row <- function(data_item,
                        workspace = NULL,
                        include_denom = NULL,
                        percent_first = NULL
-                       ) {
+) {
   list(
     data_item = enquo(data_item),
     data = data,
     data_filter = enquo(data_filter),
     data_function = function(row_item, col_item, ft_options) {
       digits <- row_digits %||% ft_options$digits_percent
-      workspace <- workspace %||% ft_options$workspace
       include_denom <- include_denom %||% ft_options$include_denom
       percent_first <- percent_first %||% ft_options$percent_first
       tab <- table(row_item, col_item)
@@ -229,7 +268,15 @@ fisher_row <- function(data_item,
         row_output = output,
         p = if (ft_options$include_p) {
           if (all(dim(tab) > 1L)) {
-            stats::fisher.test(tab, workspace = workspace)$p.value
+            workspace <- workspace %||% ft_options$workspace
+            hybrid <- any(dim(tab) > 2L) && ft_options$hybrid_fisher
+            simulate.p.value <- any(dim(tab) > 2L) && ft_options$simulate_p_value_fisher
+            stats::fisher.test(
+              tab,
+              workspace = workspace,
+              hybrid = hybrid,
+              simulate.p.value = simulate.p.value
+            )$p.value
           } else {
             NA_real_
           }
@@ -464,7 +511,7 @@ first_table_row <- function(data_item,
                                   include_reference = if (is.null(include_reference)) TRUE else include_reference)
       } else if (is.numeric(row_item) && !is.numeric(col_item)) {
         if (non_parametric) {
-          if (length(unique(col_item)) <= 2) {
+          if (length(unique(na.omit(col_item))) <= 2) {
             row_function <- wilcox_row(!!data_item, data = data, data_filter = !!data_filter,
                                        row_digits = row_digits_default %||% row_digits, na.rm = na.rm)
           } else {
@@ -514,10 +561,10 @@ first_table_row <- function(data_item,
 #'   cor_row(disp, method = "spearman")
 #' )
 cor_row <- function(data_item,
-                       data = NULL,
-                       data_filter = NULL,
-                       row_digits = NULL,
-                       method = c("pearson", "kendall", "spearman")) {
+                    data = NULL,
+                    data_filter = NULL,
+                    row_digits = NULL,
+                    method = c("pearson", "kendall", "spearman")) {
   if (missing(method)) {
     method <- NULL
   } else {
@@ -546,11 +593,11 @@ cor_row <- function(data_item,
             },
             c("r", "tau", "rho")[match(method, c("pearson", "kendall", "spearman"))]
           ),
-             p = if (ft_options$include_p) {
-               test_output$p.value
-             } else {
-               NULL
-             })
+          p = if (ft_options$include_p) {
+            test_output$p.value
+          } else {
+            NULL
+          })
       }
     }
   )

@@ -21,6 +21,13 @@
 #'   variables
 #' @param percent_first whether to put the percent before the n for categorical
 #'   variables
+#' @param hybrid_fisher whether to use a hybrid approach for
+#'   \code{\link[stats]{fisher.test}} and >2x2 tables
+#' @param simulate_p_value_fisher whether to simulate p-values for
+#'   \code{\link[stats]{fisher.test}} and >2x2 tables
+#' @param include_estimate_diff whether to include an estimate of the difference
+#'   for continuous data (with appropriate estimates for parameteric and
+#'   non-parametric data)
 #'
 #' @export
 first_table_options <- function(
@@ -40,7 +47,10 @@ first_table_options <- function(
   cor_method = c("pearson", "kendall", "spearman"),
   digits_percent = digits,
   include_denom = FALSE,
-  percent_first = FALSE
+  percent_first = FALSE,
+  hybrid_fisher = FALSE,
+  simulate_p_value_fisher = FALSE,
+  include_estimate_diff = FALSE
 ) {
   if (is.logical(include_n_per_col)) {
     if (include_n_per_col) {
@@ -66,7 +76,10 @@ first_table_options <- function(
     cor_method = match.arg(cor_method),
     digits_percent = digits_percent,
     include_denom = include_denom,
-    percent_first = percent_first
+    percent_first = percent_first,
+    hybrid_fisher = hybrid_fisher,
+    simulate_p_value_fisher = simulate_p_value_fisher,
+    include_estimate_diff = include_estimate_diff
   )
 }
 
@@ -216,9 +229,15 @@ first_table <- function(.data,
     row_data_function <- data_item$data_function
 
     if (.column_type == "numeric") {
+      # Filter when value missing
+      current_col_item <- current_col_item[!is.na(row_item)]
+      row_item <- row_item[!is.na(row_item)]
       # Swap row and columns for numeric column data to allow e.g. wilcox_test to work
       output_data <- row_data_function(current_col_item, row_item, ft_options)
     } else {
+      # Filter when value missing
+      row_item <- row_item[!is.na(current_col_item)]
+      current_col_item <- current_col_item[!is.na(current_col_item)]
       output_data <- row_data_function(row_item, current_col_item, ft_options)
     }
 
@@ -236,7 +255,6 @@ first_table <- function(.data,
       Variable = row_names[i],
       n = NA_integer_,
       row_output,
-      p = NA_character_,
       stringsAsFactors = FALSE
     )
     if (nrow(row_output) == 1L && ft_options$hide_single_level) {
@@ -247,14 +265,15 @@ first_table <- function(.data,
     } else {
       row_output$n <- NULL
     }
+    if (ft_options$include_estimate_diff) {
+      row_output$`Estimate of difference (95% CI)` <- output_data$estimate_diff %||% ""
+    }
     if (ft_options$include_p) {
       if (ft_options$pretty_p) {
         row_output$p <- pretty_p(output_data$p, ft_options$p_digits, ft_options$small_p_format, ft_options$small_p_cutoff)
       } else {
         row_output$p <- output_data$p
       }
-    } else {
-      row_output$p <- NULL
     }
     output[[i]] <- row_output
   }
@@ -265,7 +284,8 @@ first_table <- function(.data,
       Level = "",
       n = as.character(nrow(.data)),
       `colnames<-`(matrix(NA_character_, ncol = length(col_names), nrow = 1), col_names),
-      p = "",
+      `Estimate of difference (95% CI)` = NA,
+      p = if (ft_options$pretty_p) "" else NA_real_,
       stringsAsFactors = FALSE
     )
     if (!ft_options$include_n) {
@@ -273,6 +293,9 @@ first_table <- function(.data,
     }
     if (!ft_options$include_p) {
       row_with_n$p <- NULL
+    }
+    if (!ft_options$include_estimate_diff) {
+      row_with_n$estimate_diff <- NULL
     }
     row_with_n[1, col_names] <- table(col_item)[col_names]
     output <- c(list(row_with_n), output)
@@ -302,10 +325,10 @@ as_huxtable.first_table <- function(x) {
   if (ft_options$include_n) {
     cols_to_merge <- c(cols_to_merge, "n")
   }
-  if (ft_options$include_p &&
-      "p" %in% colnames(x) &&
-      !("Hazard ratio (95% CI)" %in% colnames(x))) {
-    cols_to_merge <- c(cols_to_merge, "p")
+  if (ft_options$include_p && "p" %in% colnames(x)) {
+    if (!any(str_detect(colnames(x), "(?<!difference )\\(95% CI\\)"))) {
+      cols_to_merge <- c(cols_to_merge, "p")
+    }
     if (ft_options$small_p_format == "html") {
       huxtable::escape_contents(ht_out)[, "p"] <- FALSE
     }

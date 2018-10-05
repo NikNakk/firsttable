@@ -295,7 +295,7 @@ first_table <- function(.data,
       row_with_n$p <- NULL
     }
     if (!ft_options$include_estimate_diff) {
-      row_with_n$estimate_diff <- NULL
+      row_with_n$`Estimate of difference (95% CI)` <- NULL
     }
     row_with_n[1, col_names] <- table(col_item)[col_names]
     output <- c(list(row_with_n), output)

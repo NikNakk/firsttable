@@ -254,6 +254,9 @@ fisher_row <- function(data_item,
       include_denom <- include_denom %||% ft_options$include_denom
       percent_first <- percent_first %||% ft_options$percent_first
       tab <- table(row_item, col_item)
+      if (nrow(tab) == 0) {
+        tab <- table(row_item, col_item, useNA = "ifany")
+      }
       output <-
         n_percent(
           tab,
@@ -267,7 +270,9 @@ fisher_row <- function(data_item,
       list(
         row_output = output,
         p = if (ft_options$include_p) {
-          if (all(dim(tab) > 1L)) {
+          if (all(dim(tab) > 1L) &&
+              sum(rowSums(tab) > 0, na.rm = TRUE) > 1 &&
+              sum(colSums(tab) > 0, na.rm = TRUE) > 1) {
             workspace <- workspace %||% ft_options$workspace
             hybrid <- any(dim(tab) > 2L) && ft_options$hybrid_fisher
             simulate.p.value <- any(dim(tab) > 2L) && ft_options$simulate_p_value_fisher
@@ -325,6 +330,9 @@ chisq_row <- function(data_item,
       include_denom <- include_denom %||% ft_options$include_denom
       percent_first <- percent_first %||% ft_options$percent_first
       tab <- table(row_item, col_item)
+      if (nrow(tab) == 0) {
+        tab <- table(row_item, col_item, useNA = "ifany")
+      }
       output <-
         n_percent(
           tab,
@@ -375,7 +383,7 @@ n_percent <- function(tab, na.rm, digits, include_denom, percent_first, include_
   if (!include_reference && is.null(reference_level)) {
     reference_level <- rownames(tab)[1]
   }
-  if (!is.null(reference_level)) {
+  if (!is.null(reference_level) && nrow(tab) > 1) {
     output <- output[rownames(tab) != reference_level, , drop = FALSE]
   }
   output

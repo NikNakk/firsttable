@@ -28,6 +28,8 @@
 #' @param include_estimate_diff whether to include an estimate of the difference
 #'   for continuous data (with appropriate estimates for parameteric and
 #'   non-parametric data)
+#' @param factor_name_own_row whether to have the name of a factor in a row
+#'   on its own; only affects huxtable output
 #'
 #' @export
 first_table_options <- function(
@@ -42,6 +44,8 @@ first_table_options <- function(
   default_non_parametric = TRUE,
   na_text = "NA",
   pretty_p = TRUE,
+  p_sig_fig = FALSE,
+  p_n_sig_fig = 2,
   escape_name = TRUE,
   hide_single_level = FALSE,
   cor_method = c("pearson", "kendall", "spearman"),
@@ -50,7 +54,8 @@ first_table_options <- function(
   percent_first = FALSE,
   hybrid_fisher = FALSE,
   simulate_p_value_fisher = FALSE,
-  include_estimate_diff = FALSE
+  include_estimate_diff = FALSE,
+  factor_name_own_row = FALSE
 ) {
   if (is.logical(include_n_per_col)) {
     if (include_n_per_col) {
@@ -71,6 +76,8 @@ first_table_options <- function(
     default_non_parametric = default_non_parametric,
     na_text = na_text,
     pretty_p = pretty_p,
+    p_sig_fig = p_sig_fig,
+    p_n_sig_fig = p_n_sig_fig,
     escape_name = escape_name,
     hide_single_level = hide_single_level,
     cor_method = match.arg(cor_method),
@@ -79,7 +86,8 @@ first_table_options <- function(
     percent_first = percent_first,
     hybrid_fisher = hybrid_fisher,
     simulate_p_value_fisher = simulate_p_value_fisher,
-    include_estimate_diff = include_estimate_diff
+    include_estimate_diff = include_estimate_diff,
+    factor_name_own_row = factor_name_own_row
   )
 }
 
@@ -214,7 +222,7 @@ first_table <- function(.data,
         row_item <- eval_tidy(data_item$data_item, .data)
         current_col_item <- col_item
       }
-    } else if (is.null(details_item)) {
+    } else if (is.null(data_item)) {
       stop(sprintf("Row item '%s' is NULL", ifelse(
         names(row_details)[i] == "", i, names(row_details)[i]
       )))
@@ -270,7 +278,14 @@ first_table <- function(.data,
     }
     if (ft_options$include_p) {
       if (ft_options$pretty_p) {
-        row_output$p <- pretty_p(output_data$p, ft_options$p_digits, ft_options$small_p_format, ft_options$small_p_cutoff)
+        row_output$p <- pretty_p(
+          p = output_data$p,
+          p_digits = ft_options$p_digits,
+          small_p_format = ft_options$small_p_format,
+          small_p_cutoff = ft_options$small_p_cutoff,
+          sig_fig = ft_options$p_sig_fig,
+          n_sig_fig = ft_options$p_n_sig_fig
+        )
       } else {
         row_output$p <- output_data$p
       }
@@ -317,8 +332,29 @@ as_huxtable.first_table <- function(x) {
   }
   ft_options <- attr(x, "ft_options")
 
-  rows_to_merge <- split(seq_len(nrow(x)), x$Variable)
-  cols_to_merge <- "Variable"
+  if (ft_options$factor_name_own_row) {
+    x_split <- split(x, x$Variable)
+    x_name_own_row <- lapply(
+      x_split,
+      function(df) {
+        df$Split <- df$Variable
+        if (nrow(df) > 1) {
+          name_row <- df[1, ]
+          name_row[, -1] <- NA # Blank out all cells except variable
+          df$Variable <- df$Level
+          df <- rbind(name_row, df)
+        }
+        df$Level <- NULL
+        df
+      }
+    )
+    x <- do.call("rbind", x_name_own_row)
+    rows_to_merge <- split(seq_len(nrow(x)), x$Split)
+    cols_to_merge <- character()
+  } else {
+    rows_to_merge <- split(seq_len(nrow(x)), x$Variable)
+    cols_to_merge <- "Variable"
+  }
 
   ht_out <- huxtable::hux(as.data.frame(x))
 
@@ -326,7 +362,7 @@ as_huxtable.first_table <- function(x) {
     cols_to_merge <- c(cols_to_merge, "n")
   }
   if (ft_options$include_p && "p" %in% colnames(x)) {
-    if (!any(str_detect(colnames(x), "(?<!difference )\\(95% CI\\)"))) {
+    if (!any(grepl("(?<!difference )\\(95% CI\\)", colnames(x), perl = TRUE))) {
       cols_to_merge <- c(cols_to_merge, "p")
     }
     if (ft_options$small_p_format == "html") {
@@ -334,8 +370,14 @@ as_huxtable.first_table <- function(x) {
     }
   }
 
-  if (!ft_options$include_n) {
-    huxtable::colspan(ht_out)[which(x$Level == ""), 1] <- 2
+  if (!ft_options$include_n && !ft_options$factor_name_own_row) {
+    huxtable::colspan(ht_out)[x$Level == "", 1] <- 2
+  }
+
+  if (ft_options$factor_name_own_row) {
+    huxtable::colspan(ht_out)[is.na(ht_out$Split), 1] <- ncol(ht_out) - 1
+    huxtable::bold(ht_out)[is.na(ht_out$Split), 1] <- TRUE
+    ht_out$Split <- NULL
   }
 
   huxtable::escape_contents(ht_out)[, "Variable"] <- ft_options$escape_name
@@ -398,8 +440,8 @@ print.first_table <- function(x) {
 #' @export
 knit_print.first_table <- function(x, ...) {
   if (requireNamespace("huxtable", quietly = TRUE)) {
-    knit_print(as_huxtable.first_table(x))
+    knitr::knit_print(as_huxtable.first_table(x))
   } else {
-    knit_print(as.matrix(x))
+    knitr::knit_print(as.matrix(x))
   }
 }

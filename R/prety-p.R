@@ -22,7 +22,9 @@
 pretty_p <- function(p,
                      p_digits,
                      small_p_format = c("<", "E", "x10", "plotmath", "html"),
-                     small_p_cutoff = 10^-p_digits
+                     small_p_cutoff = 10^-p_digits,
+                     sig_fig = FALSE,
+                     n_sig_fig = 2
 ) {
   small_p_format <- match.arg(small_p_format)
   if (small_p_format == "<") {
@@ -52,7 +54,15 @@ pretty_p <- function(p,
     "",
     ifelse(
       p >= small_p_cutoff,
-      sprintf("%.*f", p_digits, p),
+      sprintf(
+        "%.*f",
+        ifelse(
+          sig_fig & !is.na(p) & p != "",
+          n_sig_fig - 1 - floor(log10(signif(p, n_sig_fig))),
+          p_digits
+        ),
+        p
+      ),
       small_p_func(p, small_p_cutoff)
     )
   )

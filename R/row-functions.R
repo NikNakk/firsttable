@@ -40,8 +40,8 @@ wilcox_row <- function(data_item,
                "%2$.*1$f (%3$.*1$f - %4$.*1$f)",
                digits,
                -test$estimate,
-               -test$conf.int[1],
-               -test$conf.int[2]
+               -test$conf.int[2],
+               -test$conf.int[1]
              )
              } else {
                NA_character_
@@ -125,8 +125,8 @@ parametric_row <- function(data_item,
                  "%2$.*1$f (%3$.*1$f - %4$.*1$f)",
                  digits,
                  diff(test$estimate),
-                 -test$conf.int[1],
-                 -test$conf.int[2]
+                 -test$conf.int[2],
+                 -test$conf.int[1]
                )
              } else {
                NA_character_

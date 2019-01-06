@@ -333,7 +333,9 @@ as_huxtable.first_table <- function(x) {
   ft_options <- attr(x, "ft_options")
 
   if (ft_options$factor_name_own_row) {
-    x_split <- split(x, x$Variable)
+    x_split <- split(seq_len(nrow(x)), x$Variable)
+    x_split <- x_split[order(vapply(x_split, `[`, integer(1), 1))]
+    x_split <- lapply(x_split, function(i) x[i, ])
     x_name_own_row <- lapply(
       x_split,
       function(df) {
@@ -375,8 +377,14 @@ as_huxtable.first_table <- function(x) {
   }
 
   if (ft_options$factor_name_own_row) {
-    huxtable::colspan(ht_out)[is.na(ht_out$Split), 1] <- ncol(ht_out) - 1
+    # huxtable::colspan(ht_out)[is.na(ht_out$Split), 1] <- ncol(ht_out) - 1
     huxtable::bold(ht_out)[is.na(ht_out$Split), 1] <- TRUE
+    for (rows in rows_to_merge) {
+      if (length(rows) == 1) {
+        huxtable::bold(ht_out)[rows[1], 1] <- TRUE
+      }
+    }
+
     ht_out$Split <- NULL
   }
 

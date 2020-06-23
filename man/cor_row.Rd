@@ -4,8 +4,13 @@
 \alias{cor_row}
 \title{Correlation row}
 \usage{
-cor_row(data_item, data = NULL, data_filter = NULL, row_digits = NULL,
-  method = c("pearson", "kendall", "spearman"))
+cor_row(
+  data_item,
+  data = NULL,
+  data_filter = NULL,
+  row_digits = NULL,
+  method = c("pearson", "kendall", "spearman")
+)
 }
 \arguments{
 \item{data_item}{item to be taken from data for row}

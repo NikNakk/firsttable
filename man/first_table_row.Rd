@@ -4,11 +4,20 @@
 \alias{first_table_row}
 \title{Row with type selected by firsttable}
 \usage{
-first_table_row(data_item, data = NULL, data_filter = NULL,
-  row_digits = NULL, na.rm = TRUE, reference_level = NULL,
-  include_reference = NULL, workspace = NULL, non_parametric = NULL,
-  row_digits_default = NULL, row_digits_surv = NULL,
-  row_digits_numeric = NULL)
+first_table_row(
+  data_item,
+  data = NULL,
+  data_filter = NULL,
+  row_digits = NULL,
+  na.rm = TRUE,
+  reference_level = NULL,
+  include_reference = NULL,
+  workspace = NULL,
+  non_parametric = NULL,
+  row_digits_default = NULL,
+  row_digits_surv = NULL,
+  row_digits_numeric = NULL
+)
 }
 \arguments{
 \item{data_item}{item to be taken from data for row}

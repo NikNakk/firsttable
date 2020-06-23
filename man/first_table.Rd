@@ -4,8 +4,13 @@
 \alias{first_table}
 \title{First Table}
 \usage{
-first_table(.data, ..., .column_variable = NULL, .column_type = c("default",
-  "numeric"), .options = first_table_options())
+first_table(
+  .data,
+  ...,
+  .column_variable = NULL,
+  .column_type = c("default", "numeric"),
+  .options = first_table_options()
+)
 }
 \arguments{
 \item{.data}{`data.frame` or `tibble` to use as data source}

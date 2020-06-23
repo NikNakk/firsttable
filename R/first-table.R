@@ -185,7 +185,7 @@ first_table <- function(.data,
   n_row <- length(row_details)
   n_col <- length(levels(col_item))
 
-  output <- list_len(n_row)
+  output <- new_list(n_row)
 
   row_names <- names(row_details)
   row_names[row_names == ""] <- NA_character_
@@ -325,7 +325,7 @@ first_table <- function(.data,
   df_out
 }
 
-#' @export
+#' @exportS3Method huxtable::as_huxtable first_table
 as_huxtable.first_table <- function(x) {
   if (!requireNamespace("huxtable", quietly = TRUE)) {
     stop("`first_table_huxtable` requires the huxtable package")
@@ -445,7 +445,7 @@ print.first_table <- function(x) {
   }
 }
 
-#' @export
+#' @exportS3Method knitr::knit_print first_table
 knit_print.first_table <- function(x, ...) {
   if (requireNamespace("huxtable", quietly = TRUE)) {
     knitr::knit_print(as_huxtable.first_table(x))

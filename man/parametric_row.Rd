@@ -4,8 +4,13 @@
 \alias{parametric_row}
 \title{Row for parametric data}
 \usage{
-parametric_row(data_item, data = NULL, data_filter = NULL,
-  row_digits = NULL, na.rm = TRUE)
+parametric_row(
+  data_item,
+  data = NULL,
+  data_filter = NULL,
+  row_digits = NULL,
+  na.rm = TRUE
+)
 }
 \arguments{
 \item{data_item}{item to be taken from data for row}

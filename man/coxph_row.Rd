@@ -4,8 +4,13 @@
 \alias{coxph_row}
 \title{Cox Proportional Hazards Row}
 \usage{
-coxph_row(data_item, data = NULL, data_filter = NULL, row_digits = NULL,
-  include_reference = TRUE)
+coxph_row(
+  data_item,
+  data = NULL,
+  data_filter = NULL,
+  row_digits = NULL,
+  include_reference = TRUE
+)
 }
 \arguments{
 \item{data_item}{item to be taken from data for row}

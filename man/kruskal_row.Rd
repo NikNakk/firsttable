@@ -4,8 +4,13 @@
 \alias{kruskal_row}
 \title{Kruskal Wallis test row}
 \usage{
-kruskal_row(data_item, data = NULL, data_filter = NULL, row_digits = NULL,
-  na.rm = TRUE)
+kruskal_row(
+  data_item,
+  data = NULL,
+  data_filter = NULL,
+  row_digits = NULL,
+  na.rm = TRUE
+)
 }
 \arguments{
 \item{data_item}{item to be taken from data for row}

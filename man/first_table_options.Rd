@@ -4,14 +4,31 @@
 \alias{first_table_options}
 \title{First Table options}
 \usage{
-first_table_options(digits = 1, include_p = TRUE, p_digits = 3,
-  small_p_format = c("<", "E", "x10", "html"), small_p_cutoff = NULL,
-  include_n = FALSE, include_n_per_col = c("no", "row", "embed"),
-  workspace = 2e+05, default_non_parametric = TRUE, na_text = "NA",
-  pretty_p = TRUE, escape_name = TRUE, hide_single_level = FALSE,
-  cor_method = c("pearson", "kendall", "spearman"), digits_percent = digits,
-  include_denom = FALSE, percent_first = FALSE, hybrid_fisher = FALSE,
-  simulate_p_value_fisher = FALSE, include_estimate_diff = FALSE)
+first_table_options(
+  digits = 1,
+  include_p = TRUE,
+  p_digits = 3,
+  small_p_format = c("<", "E", "x10", "html"),
+  small_p_cutoff = NULL,
+  include_n = FALSE,
+  include_n_per_col = c("no", "row", "embed"),
+  workspace = 2e+05,
+  default_non_parametric = TRUE,
+  na_text = "NA",
+  pretty_p = TRUE,
+  p_sig_fig = FALSE,
+  p_n_sig_fig = 2,
+  escape_name = TRUE,
+  hide_single_level = FALSE,
+  cor_method = c("pearson", "kendall", "spearman"),
+  digits_percent = digits,
+  include_denom = FALSE,
+  percent_first = FALSE,
+  hybrid_fisher = FALSE,
+  simulate_p_value_fisher = FALSE,
+  include_estimate_diff = FALSE,
+  factor_name_own_row = FALSE
+)
 }
 \arguments{
 \item{digits}{digits used for formatting variables by default}
@@ -61,6 +78,9 @@ variables}
 \item{include_estimate_diff}{whether to include an estimate of the difference
 for continuous data (with appropriate estimates for parameteric and
 non-parametric data)}
+
+\item{factor_name_own_row}{whether to have the name of a factor in a row
+on its own; only affects huxtable output}
 }
 \description{
 First Table options

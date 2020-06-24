@@ -358,7 +358,7 @@ as_huxtable.first_table <- function(x) {
     cols_to_merge <- "Variable"
   }
 
-  ht_out <- huxtable::hux(as.data.frame(x))
+  ht_out <- huxtable::hux(as.data.frame(x), add_colnames = FALSE, add_rownames = FALSE)
 
   if (ft_options$include_n) {
     cols_to_merge <- c(cols_to_merge, "n")

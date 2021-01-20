@@ -55,7 +55,8 @@ first_table_options <- function(
   hybrid_fisher = FALSE,
   simulate_p_value_fisher = FALSE,
   include_estimate_diff = FALSE,
-  factor_name_own_row = FALSE
+  factor_name_own_row = FALSE,
+  cat_out_of_row = FALSE
 ) {
   if (is.logical(include_n_per_col)) {
     if (include_n_per_col) {
@@ -87,7 +88,8 @@ first_table_options <- function(
     hybrid_fisher = hybrid_fisher,
     simulate_p_value_fisher = simulate_p_value_fisher,
     include_estimate_diff = include_estimate_diff,
-    factor_name_own_row = factor_name_own_row
+    factor_name_own_row = factor_name_own_row,
+    cat_out_of_row = cat_out_of_row
   )
 }
 
@@ -232,7 +234,8 @@ first_table <- function(.data,
       row_names[i] <- row_names[i] %|%
         paste(trimws(deparse(get_expr(details_item), width.cutoff = 500)), collapse = " ")
       data_item <- first_table_row(!!details_item, workspace = ft_options$workspace,
-                                   non_parametric = ft_options$default_non_parametric)
+                                   non_parametric = ft_options$default_non_parametric,
+                                   cat_out_of_row = ft_options$cat_out_of_row)
     }
     row_data_function <- data_item$data_function
 

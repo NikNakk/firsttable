@@ -243,7 +243,8 @@ fisher_row <- function(data_item,
                        include_reference = TRUE,
                        workspace = NULL,
                        include_denom = NULL,
-                       percent_first = NULL
+                       percent_first = NULL,
+                       cat_out_of_row = NULL
 ) {
   list(
     data_item = enquo(data_item),
@@ -253,6 +254,7 @@ fisher_row <- function(data_item,
       digits <- row_digits %||% ft_options$digits_percent
       include_denom <- include_denom %||% ft_options$include_denom
       percent_first <- percent_first %||% ft_options$percent_first
+      cat_out_of_row <- cat_out_of_row %||% ft_options$cat_out_of_row
       tab <- table(row_item, col_item)
       if (nrow(tab) == 0) {
         tab <- table(row_item, col_item, useNA = "ifany")
@@ -265,7 +267,8 @@ fisher_row <- function(data_item,
           include_denom = include_denom,
           percent_first = percent_first,
           include_reference = include_reference,
-          reference_level = reference_level
+          reference_level = reference_level,
+          cat_out_of_row = cat_out_of_row
         )
       list(
         row_output = output,
@@ -320,7 +323,8 @@ chisq_row <- function(data_item,
                       reference_level = NULL,
                       include_reference = TRUE,
                       include_denom = NULL,
-                      percent_first = NULL) {
+                      percent_first = NULL,
+                      cat_out_of_row = NULL) {
   list(
     data_item = enquo(data_item),
     data = data,
@@ -329,6 +333,7 @@ chisq_row <- function(data_item,
       digits <- row_digits %||% ft_options$digits_percent
       include_denom <- include_denom %||% ft_options$include_denom
       percent_first <- percent_first %||% ft_options$percent_first
+      cat_out_of_row <- cat_out_of_row %||% ft_options$cat_out_of_row
       tab <- table(row_item, col_item)
       if (nrow(tab) == 0) {
         tab <- table(row_item, col_item, useNA = "ifany")
@@ -359,8 +364,19 @@ chisq_row <- function(data_item,
   )
 }
 
-n_percent <- function(tab, na.rm, digits, include_denom, percent_first, include_reference, reference_level) {
-  totals <- colSums(tab, na.rm = na.rm)
+n_percent <- function(tab,
+           na.rm,
+           digits,
+           include_denom,
+           percent_first,
+           include_reference,
+           reference_level,
+           cat_out_of_row) {
+  if (cat_out_of_row) {
+    totals <- rep(rowSums(tab, na.rm = na.rm), ncol(tab))
+  } else {
+    totals <- rep(colSums(tab, na.rm = na.rm), each = nrow(tab))
+  }
   pattern <- "%2$d"
   if (include_denom) {
     pattern <- paste0(pattern, "/%4$d")
@@ -374,8 +390,8 @@ n_percent <- function(tab, na.rm, digits, include_denom, percent_first, include_
     pattern,
     digits,
     tab,
-    tab / rep(totals, each = nrow(tab)) * 100,
-    rep(totals, each = nrow(tab))
+    tab / totals * 100,
+    totals
   )
 
   dim(output) <- dim(tab)
@@ -383,7 +399,7 @@ n_percent <- function(tab, na.rm, digits, include_denom, percent_first, include_
   if (!include_reference && is.null(reference_level)) {
     reference_level <- rownames(tab)[1]
   }
-  if (!is.null(reference_level) && nrow(tab) > 1) {
+  if (!include_reference && !is.null(reference_level) && nrow(tab) > 1) {
     output <- output[rownames(tab) != reference_level, , drop = FALSE]
   }
   output
@@ -502,7 +518,8 @@ first_table_row <- function(data_item,
                             non_parametric = NULL,
                             row_digits_default = NULL,
                             row_digits_surv = NULL,
-                            row_digits_numeric = NULL) {
+                            row_digits_numeric = NULL,
+                            cat_out_of_row = NULL) {
   data_item <- enquo(data_item)
   data_filter <- enquo(data_filter)
   list(
@@ -537,14 +554,14 @@ first_table_row <- function(data_item,
         row_function <- fisher_row(!!data_item, data = data, data_filter = !!data_filter,
                                    row_digits = row_digits_default %||% row_digits,
                                    na.rm = na.rm, reference_level = reference_level %||% "FALSE",
-                                   include_reference = if (is.null(include_reference)) FALSE else include_reference,
-                                   workspace = workspace)
+                                   include_reference = if (is.null(include_reference)) cat_out_of_row %||% FALSE else include_reference,
+                                   workspace = workspace, cat_out_of_row = cat_out_of_row)
       } else {
         row_function <- fisher_row(!!data_item, data = data, data_filter = !!data_filter,
                                    row_digits = row_digits_default %||% row_digits,
                                    na.rm = na.rm, reference_level = reference_level,
                                    include_reference = if (is.null(include_reference)) TRUE else include_reference,
-                                   workspace = workspace)
+                                   workspace = workspace, cat_out_of_row = cat_out_of_row)
       }
       row_function$data_function(row_item, col_item, ft_options)
     }

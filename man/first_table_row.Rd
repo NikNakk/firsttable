@@ -16,7 +16,8 @@ first_table_row(
   non_parametric = NULL,
   row_digits_default = NULL,
   row_digits_surv = NULL,
-  row_digits_numeric = NULL
+  row_digits_numeric = NULL,
+  cat_out_of_row = NULL
 )
 }
 \arguments{

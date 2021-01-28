@@ -1,5 +1,6 @@
 #' First Table options
 #'
+#' @param template existing first_table_options to populate defaults
 #' @param digits digits used for formatting variables by default
 #' @param include_p digits used for formatting p values by default
 #' @param p_digits whether to include p values in table
@@ -12,6 +13,9 @@
 #'   continuous variables
 #' @param na_text text to use for NA values
 #' @param pretty_p whether to format p values for display
+#' @param p_sig_fig whether to use significant figures for p value (rather than
+#'   decimal digits)
+#' @param p_n_sig_fig number of significant figures
 #' @param escape_name whether to escape the row name when displayed as HTML
 #' @param hide_single_level whether to hide levels for factors when only one
 #' @param cor_method default correlation method for \code{\link{cor_row}}
@@ -26,13 +30,21 @@
 #' @param simulate_p_value_fisher whether to simulate p-values for
 #'   \code{\link[stats]{fisher.test}} and >2x2 tables
 #' @param include_estimate_diff whether to include an estimate of the difference
-#'   for continuous data (with appropriate estimates for parameteric and
+#'   for continuous data (with appropriate estimates for parametric and
 #'   non-parametric data)
 #' @param factor_name_own_row whether to have the name of a factor in a row
 #'   on its own; only affects huxtable output
+#' @param cat_out_of_row whether percentages in categories should be calculated
+#'   out of row rather than column
+#' @param include_overall_column whether to include an overall column in
+#'   addition to separate columns by column variable
+#' @param hide_level_logical hide the display of the level TRUE for logical rows
+#' @param use_interpuncts replaces decimal points with interpuncts;
+#'   most commonly used for Lancet journals
 #'
 #' @export
 first_table_options <- function(
+  template = NULL,
   digits = 1,
   include_p = TRUE,
   p_digits = 3,
@@ -56,7 +68,10 @@ first_table_options <- function(
   simulate_p_value_fisher = FALSE,
   include_estimate_diff = FALSE,
   factor_name_own_row = FALSE,
-  cat_out_of_row = FALSE
+  cat_out_of_row = FALSE,
+  include_overall_column = FALSE,
+  hide_level_logical = FALSE,
+  use_interpuncts = FALSE
 ) {
   if (is.logical(include_n_per_col)) {
     if (include_n_per_col) {
@@ -65,32 +80,27 @@ first_table_options <- function(
       include_n_per_col <- "no"
     }
   }
-  list(
-    digits = digits,
-    include_p = include_p,
-    p_digits = p_digits,
-    small_p_format = match.arg(small_p_format),
-    small_p_cutoff = small_p_cutoff,
-    include_n = include_n,
-    include_n_per_col = match.arg(include_n_per_col),
-    workspace = workspace,
-    default_non_parametric = default_non_parametric,
-    na_text = na_text,
-    pretty_p = pretty_p,
-    p_sig_fig = p_sig_fig,
-    p_n_sig_fig = p_n_sig_fig,
-    escape_name = escape_name,
-    hide_single_level = hide_single_level,
-    cor_method = match.arg(cor_method),
-    digits_percent = digits_percent,
-    include_denom = include_denom,
-    percent_first = percent_first,
-    hybrid_fisher = hybrid_fisher,
-    simulate_p_value_fisher = simulate_p_value_fisher,
-    include_estimate_diff = include_estimate_diff,
-    factor_name_own_row = factor_name_own_row,
-    cat_out_of_row = cat_out_of_row
-  )
+  if (!is.null(template)) {
+    out <- template
+  } else {
+    out <- as.list(formals())
+    out$template <- NULL
+  }
+  specified <- as.list(match.call())[-1L]
+  specified$template <- NULL
+  for (i in seq_len(length(specified))) {
+    if (length(out[[names(specified)[[i]]]]) > 1L) {
+      out[[names(specified)[[i]]]] <- match.arg(specified[[i]], eval(out[[names(specified)[[i]]]]))
+    } else {
+      out[[names(specified)[[i]]]] <- specified[[i]]
+    }
+  }
+  # Substitute remaining
+  remaining_choices <- which(vapply(out, is.language, logical(1)))
+  for (i in remaining_choices) {
+    out[[i]] <- eval(out[[i]], out)[[1L]]
+  }
+  out
 }
 
 #' First Table
@@ -195,6 +205,9 @@ first_table <- function(.data,
   if (.column_type == "default" && !is.null(get_expr(.column_variable))) {
     if (!inherits(col_item, "Surv")) {
       col_names <- levels(col_item)
+      if (ft_options$include_overall_column) {
+        col_names <- c(col_names, "Overall")
+      }
     } else {
       col_names <- "Hazard ratio (95% CI)"
     }
@@ -323,6 +336,14 @@ first_table <- function(.data,
     colnames(df_out)[match(col_names, colnames(df_out))] <-
       sprintf("%s\nn = %d", col_names, table(col_item)[col_names])
   }
+  if (ft_options$use_interpuncts) {
+    df_out[] <- lapply(df_out, function(x) {
+      if (is.character(x)) {
+        x <- gsub("(\\d)\\.(\\d)", "\\1\U00B7\\2", x)
+      }
+      x
+    })
+  }
   attr(df_out, "ft_options") <- ft_options
   class(df_out) <- c("first_table", "data.frame")
   df_out
@@ -410,6 +431,9 @@ get_column_item <- function(.column_variable, .data, .column_type) {
     col_item <- eval_tidy(.column_variable, .data)
     if (inherits(col_item, "Surv") || .column_type == "numeric") {
       col_item
+    } else if (is.logical(col_item)) {
+      # prevent collapsing to single column where only one value seen in particular data item
+      col_item <- factor(col_item, levels = c(FALSE, TRUE))
     } else {
       as.factor(col_item)
     }

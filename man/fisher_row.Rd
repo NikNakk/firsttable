@@ -14,7 +14,8 @@ fisher_row(
   include_reference = TRUE,
   workspace = NULL,
   include_denom = NULL,
-  percent_first = NULL
+  percent_first = NULL,
+  cat_out_of_row = NULL
 )
 }
 \arguments{

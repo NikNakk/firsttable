@@ -13,7 +13,8 @@ chisq_row(
   reference_level = NULL,
   include_reference = TRUE,
   include_denom = NULL,
-  percent_first = NULL
+  percent_first = NULL,
+  cat_out_of_row = NULL
 )
 }
 \arguments{

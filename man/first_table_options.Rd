@@ -5,6 +5,7 @@
 \title{First Table options}
 \usage{
 first_table_options(
+  template = NULL,
   digits = 1,
   include_p = TRUE,
   p_digits = 3,
@@ -27,10 +28,16 @@ first_table_options(
   hybrid_fisher = FALSE,
   simulate_p_value_fisher = FALSE,
   include_estimate_diff = FALSE,
-  factor_name_own_row = FALSE
+  factor_name_own_row = FALSE,
+  cat_out_of_row = FALSE,
+  include_overall_column = FALSE,
+  hide_level_logical = FALSE,
+  use_interpuncts = FALSE
 )
 }
 \arguments{
+\item{template}{existing first_table_options to populate defaults}
+
 \item{digits}{digits used for formatting variables by default}
 
 \item{include_p}{digits used for formatting p values by default}
@@ -54,6 +61,11 @@ continuous variables}
 
 \item{pretty_p}{whether to format p values for display}
 
+\item{p_sig_fig}{whether to use significant figures for p value (rather than
+decimal digits)}
+
+\item{p_n_sig_fig}{number of significant figures}
+
 \item{escape_name}{whether to escape the row name when displayed as HTML}
 
 \item{hide_single_level}{whether to hide levels for factors when only one}
@@ -76,11 +88,22 @@ variables}
 \code{\link[stats]{fisher.test}} and >2x2 tables}
 
 \item{include_estimate_diff}{whether to include an estimate of the difference
-for continuous data (with appropriate estimates for parameteric and
+for continuous data (with appropriate estimates for parametric and
 non-parametric data)}
 
 \item{factor_name_own_row}{whether to have the name of a factor in a row
 on its own; only affects huxtable output}
+
+\item{cat_out_of_row}{whether percentages in categories should be calculated
+out of row rather than column}
+
+\item{include_overall_column}{whether to include an overall column in
+addition to separate columns by column variable}
+
+\item{hide_level_logical}{hide the display of the level TRUE for logical rows}
+
+\item{use_interpuncts}{replaces decimal points with interpuncts;
+most commonly used for Lancet journals}
 }
 \description{
 First Table options

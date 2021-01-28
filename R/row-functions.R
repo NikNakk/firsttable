@@ -66,8 +66,12 @@ wilcox_row <- function(data_item,
 # med_iqr -----------------------------------------------------------------
 
 med_iqr <- function(row_item, col_item, digits, na.rm, ft_options) {
-  quartiles <- lapply(
-    split(row_item, col_item),
+  num_data <- split(row_item, col_item)
+  if (ft_options$include_overall_column) {
+    num_data <- c(num_data, list(row_item))
+  }
+    quartiles <- lapply(
+    num_data,
     stats::quantile,
     probs = seq(0.25, 0.75, 0.25),
     na.rm = na.rm
@@ -255,6 +259,9 @@ fisher_row <- function(data_item,
       include_denom <- include_denom %||% ft_options$include_denom
       percent_first <- percent_first %||% ft_options$percent_first
       cat_out_of_row <- cat_out_of_row %||% ft_options$cat_out_of_row
+      if (is.logical(row_item)) {
+        row_item <- factor(row_item, levels = c(FALSE, TRUE))
+      }
       tab <- table(row_item, col_item)
       if (nrow(tab) == 0) {
         tab <- table(row_item, col_item, useNA = "ifany")
@@ -268,7 +275,9 @@ fisher_row <- function(data_item,
           percent_first = percent_first,
           include_reference = include_reference,
           reference_level = reference_level,
-          cat_out_of_row = cat_out_of_row
+          cat_out_of_row = cat_out_of_row,
+          include_overall_column = ft_options$include_overall_column,
+          hide_level_logical = ft_options$hide_level_logical
         )
       list(
         row_output = output,
@@ -334,6 +343,9 @@ chisq_row <- function(data_item,
       include_denom <- include_denom %||% ft_options$include_denom
       percent_first <- percent_first %||% ft_options$percent_first
       cat_out_of_row <- cat_out_of_row %||% ft_options$cat_out_of_row
+      if (is.logical(row_item)) {
+        row_item <- factor(row_item, levels = c(FALSE, TRUE))
+      }
       tab <- table(row_item, col_item)
       if (nrow(tab) == 0) {
         tab <- table(row_item, col_item, useNA = "ifany")
@@ -346,7 +358,9 @@ chisq_row <- function(data_item,
           include_denom = include_denom,
           percent_first = percent_first,
           include_reference = include_reference,
-          reference_level = reference_level
+          reference_level = reference_level,
+          include_overall_column = ft_options$include_overall_column,
+          hide_level_logical = ft_options$hide_level_logical
         )
       list(
         row_output = output,
@@ -371,11 +385,18 @@ n_percent <- function(tab,
            percent_first,
            include_reference,
            reference_level,
-           cat_out_of_row) {
-  if (cat_out_of_row) {
-    totals <- rep(rowSums(tab, na.rm = na.rm), ncol(tab))
+           cat_out_of_row,
+           include_overall_column,
+           hide_level_logical) {
+  if (include_overall_column) {
+    tab_display <- cbind(tab, rowSums(tab))
   } else {
-    totals <- rep(colSums(tab, na.rm = na.rm), each = nrow(tab))
+    tab_display <- tab
+  }
+  if (cat_out_of_row) {
+    totals <- rep(rowSums(tab, na.rm = na.rm), ncol(tab_display))
+  } else {
+    totals <- rep(colSums(tab_display, na.rm = na.rm), each = nrow(tab))
   }
   pattern <- "%2$d"
   if (include_denom) {
@@ -389,18 +410,21 @@ n_percent <- function(tab,
   output <- sprintf(
     pattern,
     digits,
-    tab,
-    tab / totals * 100,
+    tab_display,
+    tab_display / totals * 100,
     totals
   )
 
-  dim(output) <- dim(tab)
-  output <- cbind(rownames(tab), output)
+  dim(output) <- dim(tab_display)
+  output <- cbind(rownames(tab_display), output)
   if (!include_reference && is.null(reference_level)) {
     reference_level <- rownames(tab)[1]
   }
   if (!include_reference && !is.null(reference_level) && nrow(tab) > 1) {
     output <- output[rownames(tab) != reference_level, , drop = FALSE]
+    if (hide_level_logical && identical(output[, 1], "TRUE")) {
+      output[, 1] <- ""
+    }
   }
   output
 }

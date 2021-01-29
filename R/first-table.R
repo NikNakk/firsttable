@@ -73,13 +73,6 @@ first_table_options <- function(
   hide_level_logical = FALSE,
   use_interpuncts = FALSE
 ) {
-  if (is.logical(include_n_per_col)) {
-    if (include_n_per_col) {
-      include_n_per_col <- "row"
-    } else{
-      include_n_per_col <- "no"
-    }
-  }
   if (!is.null(template)) {
     out <- template
   } else {
@@ -88,6 +81,13 @@ first_table_options <- function(
   }
   specified <- as.list(match.call())[-1L]
   specified$template <- NULL
+  if (is.logical(specified$include_n_per_col)) {
+    if (specified$include_n_per_col) {
+      specified$include_n_per_col <- "row"
+    } else{
+      specified$include_n_per_col <- "no"
+    }
+  }
   for (i in seq_len(length(specified))) {
     if (length(out[[names(specified)[[i]]]]) > 1L) {
       out[[names(specified)[[i]]]] <- match.arg(specified[[i]], eval(out[[names(specified)[[i]]]]))
@@ -95,7 +95,7 @@ first_table_options <- function(
       out[[names(specified)[[i]]]] <- specified[[i]]
     }
   }
-  # Substitute remaining
+  # Evaluate remaining choices from the formals that were language items
   remaining_choices <- which(vapply(out, is.language, logical(1)))
   for (i in remaining_choices) {
     out[[i]] <- eval(out[[i]], out)[[1L]]

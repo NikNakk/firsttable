@@ -228,11 +228,12 @@ first_table <- function(.data,
           !is.null(get_expr(data_item$data_filter))) {
         row_data <- data_item$data %||% .data
         if (!is.null(get_expr(data_item$data_filter))) {
-          stopifnot(requireNamespace("dplyr"))
-          row_data <- dplyr::filter(row_data, !!data_item$data_filter)
+          filter_mask <- eval_tidy(data_item$data_filter, row_data)
+        } else {
+          filter_mask <- TRUE
         }
-        row_item <- eval_tidy(data_item$data_item, row_data)
-        current_col_item <- get_column_item(.column_variable, row_data, .column_type)
+        row_item <- eval_tidy(data_item$data_item, row_data)[filter_mask]
+        current_col_item <- get_column_item(.column_variable, row_data, .column_type)[filter_mask]
       } else {
         row_item <- eval_tidy(data_item$data_item, .data)
         current_col_item <- col_item

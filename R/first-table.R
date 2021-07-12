@@ -332,7 +332,7 @@ first_table <- function(.data,
     row_with_n[1, col_names] <- table(col_item)[col_names]
     output <- c(list(row_with_n), output)
   }
-  df_out <- invoke(rbind, output)
+  df_out <- do.call(rbind, output)
   if (ft_options$include_n_per_col == "embed" && n_col >= 1) {
     colnames(df_out)[match(col_names, colnames(df_out))] <-
       sprintf("%s\nn = %d", col_names, table(col_item)[col_names])

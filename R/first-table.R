@@ -234,7 +234,7 @@ first_table <- function(.data,
     details_item <- row_details[[i]]
     data_item <- eval_tidy(details_item, .data)
     # Check if the item for this row is a call to a row function or not
-    if (is.call(details_item[[2L]]) &&
+    if (is.call(rlang::quo_get_expr(details_item)) &&
         is.list(data_item) &&
         all(c("data_item", "data_function") %in% names(data_item))) {
       row_names[i] <- row_names[i] %|%

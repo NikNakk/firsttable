@@ -38,7 +38,7 @@ test_that(
       as.matrix(first_table(mtcars_6_8,
                 .column_variable = cyl,
                 "Miles per gallon" = wilcox_row(mpg, row_digits = 2),
-                "Transmission" = fisher_row(am, reference_level = 0))),
+                "Transmission" = fisher_row(am, reference_level = 0, include_reference = FALSE))),
       structure(
         c(
           "Miles per gallon",
@@ -95,8 +95,8 @@ test_that(
   "Survival columns work",
   {
     expect_equal(
-      as.matrix(first_table(lung,
-                  .column_variable = Surv(time, status),
+      as.matrix(first_table(survival::lung,
+                  .column_variable = survival::Surv(time, status),
                   .options = list(include_n = TRUE),
                   ECOG = factor(ph.ecog),
                   `Meal calories` = first_table_row(meal.cal, row_digits = 2)

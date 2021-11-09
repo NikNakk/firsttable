@@ -408,21 +408,21 @@ n_percent <- function(tab,
     totals <- rep(colSums(tab_display, na.rm = na.rm), each = nrow(tab))
   }
   pattern <- "%2$d"
+  variables <- quos(
+    digits,
+    tab_display,
+    tab_display / totals * 100
+  )
   if (include_denom) {
     pattern <- paste0(pattern, "/%4$d")
+    variables <- c(variables, quos(totals))
   }
   if (percent_first) {
     pattern <- paste0("%3$.*1$f%% (", pattern, ")")
   } else {
     pattern <- paste0(pattern, " (%3$.*1$f%%)")
   }
-  output <- sprintf(
-    pattern,
-    digits,
-    tab_display,
-    tab_display / totals * 100,
-    totals
-  )
+  output <- rlang::eval_tidy(expr(sprintf(pattern, !!!variables)))
 
   dim(output) <- dim(tab_display)
   output <- cbind(rownames(tab_display), output)

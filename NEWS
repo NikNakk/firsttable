@@ -1,3 +1,10 @@
+firsttable 0.2.1 (2021-11-09)
+-----------------------------
+
+* Added more options for parametric rows
+* Note that the old syntax for options is no longer supported; these must
+  be supplied using `.options`.
+
 firsttable 0.1.2 (2018-05-23)
 -----------------------------
 

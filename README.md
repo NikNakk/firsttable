@@ -21,4 +21,5 @@ status](https://ci.appveyor.com/api/projects/status/github/NikNakk/firsttable?br
 Status](https://travis-ci.org/NikNakk/firsttable.svg?branch=master)](https://travis-ci.org/NikNakk/firsttable)
 [![Code
 Coverage](https://codecov.io/gh/NikNakk/firsttable/branch/master/graph/badge.svg)](https://codecov.io/github/NikNakk/firsttable?branch=master)
+[![R-CMD-check](https://github.com/NikNakk/firsttable/workflows/R-CMD-check/badge.svg)](https://github.com/NikNakk/firsttable/actions)
 <!-- badges: end -->

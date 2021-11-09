@@ -17,9 +17,7 @@ quasiquotation operators such as `!!` and `!!!`.
 
 [![AppVeyor build
 status](https://ci.appveyor.com/api/projects/status/github/NikNakk/firsttable?branch=main&svg=true)](https://ci.appveyor.com/project/NikNakk/firsttable)
-[![Build
-Status](https://travis-ci.org/NikNakk/firsttable.svg?branch=master)](https://travis-ci.org/NikNakk/firsttable)
-[![Code
-Coverage](https://codecov.io/gh/NikNakk/firsttable/branch/master/graph/badge.svg)](https://codecov.io/github/NikNakk/firsttable?branch=master)
 [![R-CMD-check](https://github.com/NikNakk/firsttable/workflows/R-CMD-check/badge.svg)](https://github.com/NikNakk/firsttable/actions)
+[![Codecov test
+coverage](https://codecov.io/gh/NikNakk/firsttable/branch/main/graph/badge.svg)](https://codecov.io/gh/NikNakk/firsttable?branch=main)
 <!-- badges: end -->

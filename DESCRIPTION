@@ -11,10 +11,12 @@ Imports: rlang (>= 0.4.7)
 License: GPL-3
 LazyData: true
 RoxygenNote: 7.1.2
-Suggests: testthat,
-  dplyr,
-  survival,
-  knitr,
-  rmarkdown,
-  huxtable
+Suggests: 
+    testthat,
+    dplyr,
+    survival,
+    knitr,
+    rmarkdown,
+    huxtable,
+    covr
 VignetteBuilder: knitr

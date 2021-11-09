@@ -57,7 +57,7 @@ pretty_p <- function(p,
       sprintf(
         "%.*f",
         ifelse(
-          sig_fig & !is.na(p) & p != "",
+          sig_fig & !is.na(p) & p != "" & p > 0,
           n_sig_fig - 1 - floor(log10(signif(p, n_sig_fig))),
           p_digits
         ),

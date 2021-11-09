@@ -37,12 +37,12 @@ wilcox_row <- function(data_item,
            estimate_diff = if (ft_options$include_estimate_diff) {
              if (length(unique(col_item[!is.na(row_item)])) == 2L) {
                sprintf(
-               "%2$.*1$f (%3$.*1$f - %4$.*1$f)",
-               digits,
-               -test$estimate,
-               -test$conf.int[2],
-               -test$conf.int[1]
-             )
+                 "%2$.*1$f (%3$.*1$f - %4$.*1$f)",
+                 digits,
+                 -test$estimate,
+                 -test$conf.int[2],
+                 -test$conf.int[1]
+               )
              } else {
                NA_character_
              }
@@ -58,10 +58,14 @@ wilcox_row <- function(data_item,
            } else {
              NULL
            }
-           )
+      )
     }
   )
 }
+
+# null_trans --------------------------------------------------------------
+
+null_trans <- function(x) x
 
 # med_iqr -----------------------------------------------------------------
 
@@ -70,7 +74,7 @@ med_iqr <- function(row_item, col_item, digits, na.rm, ft_options) {
   if (ft_options$include_overall_column) {
     num_data <- c(num_data, list(row_item))
   }
-    quartiles <- lapply(
+  quartiles <- lapply(
     num_data,
     stats::quantile,
     probs = seq(0.25, 0.75, 0.25),
@@ -94,7 +98,7 @@ med_iqr <- function(row_item, col_item, digits, na.rm, ft_options) {
 #'
 #' @param data_item item to be taken from data for row
 #' @param row_digits digits for data item (overrides table as a whole)
-#' @param na.rm whether to remove NA before reporting median and quartiles
+#' @param na.rm whether to remove NA before reporting means and standard deviations
 #' @param data separate dataset to use
 #' @param data_filter filter to apply to dataset
 #'
@@ -110,19 +114,23 @@ parametric_row <- function(data_item,
                            data = NULL,
                            data_filter = NULL,
                            row_digits = NULL,
-                           na.rm = TRUE) {
+                           na.rm = TRUE,
+                           trans = NULL,
+                           atrans = NULL) {
   list(
     data_item = enquo(data_item),
     data = data,
     data_filter = enquo(data_filter),
     data_function = function(row_item, col_item, ft_options) {
       digits <- row_digits %||% ft_options$digits
+      trans <- trans %||% ft_options$default_param_trans %||% null_trans
+      atrans <- atrans %||% ft_options$default_param_atrans %||% null_trans
       if ((ft_options$include_p || ft_options$include_estimate_diff) &&
           length(unique(col_item[!is.na(row_item)])) == 2L) {
         test <- stats::t.test(row_item ~ col_item)
       }
 
-      list(row_output = mean_sd(row_item, col_item, digits, na.rm, ft_options),
+      list(row_output = mean_sd(row_item, col_item, digits, na.rm, trans, atrans, ft_options),
            estimate_diff = if (ft_options$include_estimate_diff) {
              if (length(unique(col_item[!is.na(row_item)])) == 2L) {
                sprintf(
@@ -140,9 +148,9 @@ parametric_row <- function(data_item,
            },
            p = if (ft_options$include_p) {
              if (length(unique(col_item[!is.na(row_item)])) == 2L) {
-               stats::t.test(row_item ~ col_item)$p.value
+               stats::t.test(trans(row_item) ~ col_item)$p.value
              } else {
-               NA_real_
+               summary(stats::aov(trans(row_item) ~ col_item))[[1]]$`Pr(>F)`[[1]]
              }
            } else {
              NULL
@@ -153,10 +161,10 @@ parametric_row <- function(data_item,
 
 # mean_sd -----------------------------------------------------------------
 
-mean_sd <- function(row_item, col_item, digits, na.rm, ft_options) {
+mean_sd <- function(row_item, col_item, digits, na.rm, trans, atrans, ft_options) {
   values <- lapply(
     split(row_item, col_item),
-    function(x) {c(mean(x, na.rm = na.rm), stats::sd(x, na.rm = na.rm))}
+    function(x) {c(atrans(mean(trans(x), na.rm = na.rm)), atrans(stats::sd(trans(x), na.rm = na.rm)))}
   )
   values <- simplify2array(values)
   out <- sprintf(
@@ -359,6 +367,7 @@ chisq_row <- function(data_item,
           percent_first = percent_first,
           include_reference = include_reference,
           reference_level = reference_level,
+          cat_out_of_row = cat_out_of_row,
           include_overall_column = ft_options$include_overall_column,
           hide_level_logical = ft_options$hide_level_logical
         )
@@ -379,15 +388,15 @@ chisq_row <- function(data_item,
 }
 
 n_percent <- function(tab,
-           na.rm,
-           digits,
-           include_denom,
-           percent_first,
-           include_reference,
-           reference_level,
-           cat_out_of_row,
-           include_overall_column,
-           hide_level_logical) {
+                      na.rm,
+                      digits,
+                      include_denom,
+                      percent_first,
+                      include_reference,
+                      reference_level,
+                      cat_out_of_row,
+                      include_overall_column,
+                      hide_level_logical) {
   if (include_overall_column) {
     tab_display <- cbind(tab, rowSums(tab))
   } else {
@@ -624,7 +633,7 @@ cor_row <- function(data_item,
     data = data,
     data_filter = enquo(data_filter),
     data_function = function(row_item, col_item, ft_options) {
-      digits <- row_digits %||% ft_options$digits
+      digits <- row_digits %||% ft_options$digits_cor %||% ft_options$digits
       method <- method %||% ft_options$cor_method
       if (sum(!is.na(col_item)) <= 3) {
         list(row_output = "", p = if (ft_options$include_p) NA_real_ else NULL)

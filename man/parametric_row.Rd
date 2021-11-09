@@ -9,7 +9,9 @@ parametric_row(
   data = NULL,
   data_filter = NULL,
   row_digits = NULL,
-  na.rm = TRUE
+  na.rm = TRUE,
+  trans = NULL,
+  atrans = NULL
 )
 }
 \arguments{
@@ -21,7 +23,7 @@ parametric_row(
 
 \item{row_digits}{digits for data item (overrides table as a whole)}
 
-\item{na.rm}{whether to remove NA before reporting median and quartiles}
+\item{na.rm}{whether to remove NA before reporting means and standard deviations}
 }
 \description{
 Row for parametric data

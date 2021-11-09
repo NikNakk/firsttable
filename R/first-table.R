@@ -21,6 +21,7 @@
 #' @param cor_method default correlation method for \code{\link{cor_row}}
 #' @param digits_percent digits used by default for percentages
 #'   (overrides \code{digits})
+#' @param digits_cor digits used by default for correlation (overrides \code{digits})
 #' @param include_denom whether to include the denominator for categorical
 #'   variables
 #' @param percent_first whether to put the percent before the n for categorical
@@ -41,6 +42,10 @@
 #' @param hide_level_logical hide the display of the level TRUE for logical rows
 #' @param use_interpuncts replaces decimal points with interpuncts;
 #'   most commonly used for Lancet journals
+#' @param default_param_trans default transformation for parametric data prior to
+#'   calculating mean and standard deviation
+#' @param default_param_atrans default transformation for parametric data prior to
+#'   calculating reporting standard deviation
 #'
 #' @export
 first_table_options <- function(
@@ -62,6 +67,7 @@ first_table_options <- function(
   hide_single_level = FALSE,
   cor_method = c("pearson", "kendall", "spearman"),
   digits_percent = digits,
+  digits_cor = digits,
   include_denom = FALSE,
   percent_first = FALSE,
   hybrid_fisher = FALSE,
@@ -71,13 +77,19 @@ first_table_options <- function(
   cat_out_of_row = FALSE,
   include_overall_column = FALSE,
   hide_level_logical = FALSE,
-  use_interpuncts = FALSE
+  use_interpuncts = FALSE,
+  default_param_trans = NULL,
+  default_param_atrans = NULL
 ) {
+  fmls <- as.list(formals())
+  out <- fmls
+  out$template <- NULL
   if (!is.null(template)) {
-    out <- template
-  } else {
-    out <- as.list(formals())
-    out$template <- NULL
+    for (i in names(template)) {
+      if (i %in% names(out)) {
+        out[[i]] <- template[[i]]
+      }
+    }
   }
   specified <- as.list(match.call())[-1L]
   specified$template <- NULL
@@ -95,10 +107,13 @@ first_table_options <- function(
       out[[names(specified)[[i]]]] <- specified[[i]]
     }
   }
-  # Evaluate remaining choices from the formals that were language items
-  remaining_choices <- which(vapply(out, is.language, logical(1)))
+  # Evaluate remaining choices from the output that are language items
+  remaining_choices <- names(out)[which(vapply(out, is.language, logical(1)))]
   for (i in remaining_choices) {
-    out[[i]] <- eval(out[[i]], out)[[1L]]
+    out[[i]] <- eval(out[[i]], out)
+    if (is.atomic(out[[i]])) {
+      out[[i]] <- out[[i]][[1]]
+    }
   }
   out
 }

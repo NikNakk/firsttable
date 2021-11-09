@@ -23,6 +23,7 @@ first_table_options(
   hide_single_level = FALSE,
   cor_method = c("pearson", "kendall", "spearman"),
   digits_percent = digits,
+  digits_cor = digits,
   include_denom = FALSE,
   percent_first = FALSE,
   hybrid_fisher = FALSE,
@@ -32,7 +33,9 @@ first_table_options(
   cat_out_of_row = FALSE,
   include_overall_column = FALSE,
   hide_level_logical = FALSE,
-  use_interpuncts = FALSE
+  use_interpuncts = FALSE,
+  default_param_trans = NULL,
+  default_param_atrans = NULL
 )
 }
 \arguments{
@@ -75,6 +78,8 @@ decimal digits)}
 \item{digits_percent}{digits used by default for percentages
 (overrides \code{digits})}
 
+\item{digits_cor}{digits used by default for correlation (overrides \code{digits})}
+
 \item{include_denom}{whether to include the denominator for categorical
 variables}
 
@@ -104,6 +109,12 @@ addition to separate columns by column variable}
 
 \item{use_interpuncts}{replaces decimal points with interpuncts;
 most commonly used for Lancet journals}
+
+\item{default_param_trans}{default transformation for parametric data prior to
+calculating mean and standard deviation}
+
+\item{default_param_atrans}{default transformation for parametric data prior to
+calculating reporting standard deviation}
 }
 \description{
 First Table options

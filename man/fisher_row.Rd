@@ -41,6 +41,9 @@ variables}
 
 \item{percent_first}{whether to put the percent before the n for categorical
 variables}
+
+\item{cat_out_of_row}{whether percentages in categories should be calculated
+out of row rather than column}
 }
 \description{
 Row using Fisher's exact test

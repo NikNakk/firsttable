@@ -32,6 +32,15 @@ chisq_row(
 
 \item{include_reference}{whether to include the first level of the factor
 in the report}
+
+\item{include_denom}{whether to include the denominator for categorical
+variables}
+
+\item{percent_first}{whether to put the percent before the n for categorical
+variables}
+
+\item{cat_out_of_row}{whether percentages in categories should be calculated
+out of row rather than column}
 }
 \description{
 Row using chi squared test

@@ -4,6 +4,8 @@
 #' @param p_digits number of digits to display
 #' @param small_p_format format used to display p values below a threshold
 #' @param small_p_cutoff cutoff for displaying alternative formatting
+#' @param sig_fig whether to use significant figures when rounding p values
+#' @param n_sig_fig number of significant figures to use
 #'
 #' @return formatted p value
 #' @export

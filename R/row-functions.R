@@ -101,6 +101,10 @@ med_iqr <- function(row_item, col_item, digits, na.rm, ft_options) {
 #' @param na.rm whether to remove NA before reporting means and standard deviations
 #' @param data separate dataset to use
 #' @param data_filter filter to apply to dataset
+#' @param trans function to apply to data prior to generating means, standard deviations
+#'   and p values
+#' @param atrans inverse function to apply to data after generating means, standard deviations
+#'   and p values
 #'
 #' @export
 #' @examples
@@ -236,6 +240,9 @@ kruskal_row <- function(data_item,
 #'   variables
 #' @param percent_first whether to put the percent before the n for categorical
 #'   variables
+#' @param cat_out_of_row whether percentages in categories should be calculated
+#'   out of row rather than column
+
 #'
 #' @export
 #'
@@ -322,6 +329,12 @@ fisher_row <- function(data_item,
 #' @param reference_level a level of the variable to drop from display
 #' @param include_reference whether to include the first level of the factor
 #'        in the report
+#' @param include_denom whether to include the denominator for categorical
+#'   variables
+#' @param percent_first whether to put the percent before the n for categorical
+#'   variables
+#' @param cat_out_of_row whether percentages in categories should be calculated
+#'   out of row rather than column
 #'
 #' @export
 #'
@@ -516,11 +529,13 @@ coxph_row <- function(data_item,
 #'   relevant for logical/factor/character variables)
 #' @param workspace passed onto \code{\link[stats]{fisher.test}}
 #' @param non_parametric whether to use non-parametric tests
-#' @param rows_digits_default digits where \code{.column_type = "default"}
-#' @param rows_digits_surv digits where \code{.column_type = "default"} and
+#' @param row_digits_default digits where \code{.column_type = "default"}
+#' @param row_digits_surv digits where \code{.column_type = "default"} and
 #'   \code{.column_variable} inherits \code{Surv}
-#' @param rows_digits_numeric digits where \code{.column_type = "numeric"}
-
+#' @param row_digits_numeric digits where \code{.column_type = "numeric"}
+#' @param cat_out_of_row whether percentages in categories should be calculated
+#'   out of row rather than column
+#'
 #' @return row for inclusion in `first_table`
 #'
 #' @details This provides a generic row for \code{\link{first_table}} with
@@ -569,7 +584,7 @@ first_table_row <- function(data_item,
                                   include_reference = if (is.null(include_reference)) TRUE else include_reference)
       } else if (is.numeric(row_item) && !is.numeric(col_item)) {
         if (non_parametric) {
-          if (length(unique(na.omit(col_item))) <= 2) {
+          if (length(unique(stats::na.omit(col_item))) <= 2) {
             row_function <- wilcox_row(!!data_item, data = data, data_filter = !!data_filter,
                                        row_digits = row_digits_default %||% row_digits, na.rm = na.rm)
           } else {
@@ -638,7 +653,7 @@ cor_row <- function(data_item,
       if (sum(!is.na(col_item)) <= 3) {
         list(row_output = "", p = if (ft_options$include_p) NA_real_ else NULL)
       } else {
-        test_output <- cor.test(row_item, col_item, method = method)
+        test_output <- stats::cor.test(row_item, col_item, method = method)
         list(
           row_output = sprintf(
             "%4$s = %2$.*1$f%3$s",

@@ -41,12 +41,15 @@ a factor (only relevant for logical/factor/character variables)}
 
 \item{non_parametric}{whether to use non-parametric tests}
 
-\item{rows_digits_default}{digits where \code{.column_type = "default"}}
+\item{row_digits_default}{digits where \code{.column_type = "default"}}
 
-\item{rows_digits_surv}{digits where \code{.column_type = "default"} and
+\item{row_digits_surv}{digits where \code{.column_type = "default"} and
 \code{.column_variable} inherits \code{Surv}}
 
-\item{rows_digits_numeric}{digits where \code{.column_type = "numeric"}}
+\item{row_digits_numeric}{digits where \code{.column_type = "numeric"}}
+
+\item{cat_out_of_row}{whether percentages in categories should be calculated
+out of row rather than column}
 }
 \value{
 row for inclusion in `first_table`

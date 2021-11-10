@@ -24,6 +24,12 @@ parametric_row(
 \item{row_digits}{digits for data item (overrides table as a whole)}
 
 \item{na.rm}{whether to remove NA before reporting means and standard deviations}
+
+\item{trans}{function to apply to data prior to generating means, standard deviations
+and p values}
+
+\item{atrans}{inverse function to apply to data after generating means, standard deviations
+and p values}
 }
 \description{
 Row for parametric data

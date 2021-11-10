@@ -459,7 +459,7 @@ get_column_item <- function(.column_variable, .data, .column_type) {
 }
 
 #' @export
-as.matrix.first_table <- function(x) {
+as.matrix.first_table <- function(x, ...) {
   ft_options <- attr(x, "ft_options")
   x$Variable[duplicated(x$Variable)] <- ""
   if (ft_options$include_n) {
@@ -480,7 +480,7 @@ as.data.frame.first_table <- function(x, ...) {
 }
 
 #' @export
-print.first_table <- function(x) {
+print.first_table <- function(x, ...) {
   if (requireNamespace("huxtable", quietly = TRUE)) {
     print(as_huxtable.first_table(x))
   } else {

@@ -21,6 +21,10 @@ pretty_p(
 \item{small_p_format}{format used to display p values below a threshold}
 
 \item{small_p_cutoff}{cutoff for displaying alternative formatting}
+
+\item{sig_fig}{whether to use significant figures when rounding p values}
+
+\item{n_sig_fig}{number of significant figures to use}
 }
 \value{
 formatted p value

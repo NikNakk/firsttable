@@ -138,7 +138,9 @@ parametric_row <- function(data_item,
         test <- stats::t.test(row_item ~ col_item)
       }
 
-      list(row_output = mean_sd(row_item, col_item, digits, na.rm, trans, atrans, ft_options),
+      list(row_output = mean_sd(row_item = row_item, col_item = col_item,
+                                digits = digits, na.rm = na.rm, trans = trans,
+                                atrans = atrans, digits_sd = digits_sd, ft_options = ft_options),
            estimate_diff = if (ft_options$include_estimate_diff) {
              if (length(unique(col_item[!is.na(row_item)])) == 2L) {
                sprintf(

@@ -169,17 +169,18 @@ parametric_row <- function(data_item,
 
 # mean_sd -----------------------------------------------------------------
 
-mean_sd <- function(row_item, col_item, digits, na.rm, trans, atrans, ft_options) {
+mean_sd <- function(row_item, col_item, digits, na.rm, trans, atrans, digits_sd = digits, ft_options) {
   values <- lapply(
     split(row_item, col_item),
     function(x) {c(atrans(mean(trans(x), na.rm = na.rm)), atrans(stats::sd(trans(x), na.rm = na.rm)))}
   )
   values <- simplify2array(values)
   out <- sprintf(
-    "%2$.*1$f (%3$.*1$f)",
+    "%2$.*1$f (%3$.*4$f)",
     digits,
     values[1, ],
-    values[2, ]
+    values[2, ],
+    digits_sd
   )
   out[out == "NA (NA)"] <- ft_options$na_text
   out

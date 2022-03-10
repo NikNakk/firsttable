@@ -9,6 +9,7 @@ parametric_row(
   data = NULL,
   data_filter = NULL,
   row_digits = NULL,
+  row_digits_sd = NULL,
   na.rm = TRUE,
   trans = NULL,
   atrans = NULL
@@ -22,6 +23,9 @@ parametric_row(
 \item{data_filter}{filter to apply to dataset}
 
 \item{row_digits}{digits for data item (overrides table as a whole)}
+
+\item{row_digits_sd}{digits for standard deviation (defaults to the same as
+\code{row_digits} if set, otherwise defaults to what is set in table options)}
 
 \item{na.rm}{whether to remove NA before reporting means and standard deviations}
 

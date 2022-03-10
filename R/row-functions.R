@@ -98,6 +98,8 @@ med_iqr <- function(row_item, col_item, digits, na.rm, ft_options) {
 #'
 #' @param data_item item to be taken from data for row
 #' @param row_digits digits for data item (overrides table as a whole)
+#' @param row_digits_sd digits for standard deviation (defaults to the same as
+#'   \code{row_digits} if set, otherwise defaults to what is set in table options)
 #' @param na.rm whether to remove NA before reporting means and standard deviations
 #' @param data separate dataset to use
 #' @param data_filter filter to apply to dataset
@@ -118,6 +120,7 @@ parametric_row <- function(data_item,
                            data = NULL,
                            data_filter = NULL,
                            row_digits = NULL,
+                           row_digits_sd = NULL,
                            na.rm = TRUE,
                            trans = NULL,
                            atrans = NULL) {
@@ -129,6 +132,7 @@ parametric_row <- function(data_item,
       digits <- row_digits %||% ft_options$digits
       trans <- trans %||% ft_options$default_param_trans %||% null_trans
       atrans <- atrans %||% ft_options$default_param_atrans %||% null_trans
+      digits_sd <- row_digits_sd %||% row_digits %||% ft_options$digits_sd
       if ((ft_options$include_p || ft_options$include_estimate_diff) &&
           length(unique(col_item[!is.na(row_item)])) == 2L) {
         test <- stats::t.test(row_item ~ col_item)

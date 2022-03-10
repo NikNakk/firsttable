@@ -22,6 +22,8 @@
 #' @param digits_percent digits used by default for percentages
 #'   (overrides \code{digits})
 #' @param digits_cor digits used by default for correlation (overrides \code{digits})
+#' @param digits_sd digits used by default for standard deviation in parametric
+#'   rows (overrides \code{digits})
 #' @param include_denom whether to include the denominator for categorical
 #'   variables
 #' @param percent_first whether to put the percent before the n for categorical
@@ -68,6 +70,7 @@ first_table_options <- function(
   cor_method = c("pearson", "kendall", "spearman"),
   digits_percent = digits,
   digits_cor = digits,
+  digits_sd = digits,
   include_denom = FALSE,
   percent_first = FALSE,
   hybrid_fisher = FALSE,

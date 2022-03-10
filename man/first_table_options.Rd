@@ -24,6 +24,7 @@ first_table_options(
   cor_method = c("pearson", "kendall", "spearman"),
   digits_percent = digits,
   digits_cor = digits,
+  digits_sd = digits,
   include_denom = FALSE,
   percent_first = FALSE,
   hybrid_fisher = FALSE,
@@ -79,6 +80,9 @@ decimal digits)}
 (overrides \code{digits})}
 
 \item{digits_cor}{digits used by default for correlation (overrides \code{digits})}
+
+\item{digits_sd}{digits used by default for standard deviation in parametric
+rows (overrides \code{digits})}
 
 \item{include_denom}{whether to include the denominator for categorical
 variables}

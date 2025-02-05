@@ -57,7 +57,8 @@ wilcox_row <- function(data_item,
              }
            } else {
              NULL
-           }
+           },
+           range_output = get_range(row_item, digits, na.rm, ft_options)
       )
     }
   )
@@ -90,6 +91,18 @@ med_iqr <- function(row_item, col_item, digits, na.rm, ft_options) {
   )
   out[out == "NA (NA - NA)"] <- ft_options$na_text
   out
+}
+
+# get_range -------------------------------------------------------------------
+
+get_range <- function(row_item, digits, na.rm, ft_options) {
+  range_data <- range(row_item, na.rm = na.rm)
+  out <- sprintf(
+    "%2$.*1$f, %3$.*1$f",
+    digits,
+    range_data[1],
+    range_data[2]
+  )
 }
 
 # parametric_row --------------------------------------------------------------
@@ -138,33 +151,41 @@ parametric_row <- function(data_item,
         test <- stats::t.test(row_item ~ col_item)
       }
 
-      list(row_output = mean_sd(row_item = row_item, col_item = col_item,
-                                digits = digits, na.rm = na.rm, trans = trans,
-                                atrans = atrans, digits_sd = digits_sd, ft_options = ft_options),
-           estimate_diff = if (ft_options$include_estimate_diff) {
-             if (length(unique(col_item[!is.na(row_item)])) == 2L) {
-               sprintf(
-                 "%2$.*1$f (%3$.*1$f - %4$.*1$f)",
-                 digits,
-                 diff(test$estimate),
-                 -test$conf.int[2],
-                 -test$conf.int[1]
-               )
-             } else {
-               NA_character_
-             }
-           } else {
-             NULL
-           },
-           p = if (ft_options$include_p) {
-             if (length(unique(col_item[!is.na(row_item)])) == 2L) {
-               stats::t.test(trans(row_item) ~ col_item)$p.value
-             } else {
-               summary(stats::aov(trans(row_item) ~ col_item))[[1]]$`Pr(>F)`[[1]]
-             }
-           } else {
-             NULL
-           })
+      list(
+        row_output = mean_sd(
+          row_item = row_item,
+          col_item = col_item,
+          digits = digits,
+          na.rm = na.rm,
+          trans = trans,
+          atrans = atrans,
+          digits_sd = digits_sd,
+          ft_options = ft_options
+        ),
+        estimate_diff = if (ft_options$include_estimate_diff) {
+          if (length(unique(col_item[!is.na(row_item)])) == 2L) {
+            sprintf(
+              "%2$.*1$f (%3$.*1$f - %4$.*1$f)",
+              digits,
+              diff(test$estimate),-test$conf.int[2],-test$conf.int[1]
+            )
+          } else {
+            NA_character_
+          }
+        } else {
+          NULL
+        },
+        p = if (ft_options$include_p) {
+          if (length(unique(col_item[!is.na(row_item)])) == 2L) {
+            stats::t.test(trans(row_item) ~ col_item)$p.value
+          } else {
+            summary(stats::aov(trans(row_item) ~ col_item))[[1]]$`Pr(>F)`[[1]]
+          }
+        } else {
+          NULL
+        },
+        range_output = get_range(row_item, digits, na.rm, ft_options)
+      )
     }
   )
 }
@@ -226,7 +247,8 @@ kruskal_row <- function(data_item,
           }
         } else {
           NULL
-        }
+        },
+        range_output = get_range(row_item, digits, na.rm, ft_options)
       )
     }
   )

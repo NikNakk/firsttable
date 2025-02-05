@@ -82,7 +82,8 @@ first_table_options <- function(
   hide_level_logical = FALSE,
   use_interpuncts = FALSE,
   default_param_trans = NULL,
-  default_param_atrans = NULL
+  default_param_atrans = NULL,
+  include_range = FALSE
 ) {
   fmls <- as.list(formals())
   out <- fmls
@@ -323,6 +324,13 @@ first_table <- function(.data,
         )
       } else {
         row_output$p <- output_data$p
+      }
+    }
+    if (ft_options$include_range) {
+      if (!is.null(output_data$range_output)) {
+        row_output$Range <- output_data$range_output
+      } else {
+        row_output$Range <- ""
       }
     }
     output[[i]] <- row_output
